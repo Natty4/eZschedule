@@ -3,6 +3,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
+from cloudinary.models import CloudinaryField 
+from cloudinary import CloudinaryImage
+from django.utils.translation import gettext_lazy as _
+
+
 
 
 class User(AbstractUser):
@@ -48,12 +53,12 @@ class Customer(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='category_images/', blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)  # Use CloudinaryField instead of ImageField
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
@@ -71,15 +76,14 @@ class Business(models.Model):
     email = models.EmailField(unique=True)
     website = models.URLField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='business_images/', blank=True, null=True)
-    logo = models.ImageField(upload_to='business_logos/', blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)  # Use CloudinaryField
+    logo = CloudinaryField('logo', blank=True, null=True)    # Use CloudinaryField for logos
     theme_color = models.CharField(max_length=7, default='#000000')
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False, db_index=True)
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
 
     def __str__(self):
         return self.name
@@ -91,11 +95,11 @@ class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='employee_profile')
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='employees', db_index=True)
     full_name = models.CharField(max_length=50)
-    photo = models.ImageField(upload_to='employee_photos/', blank=True, null=True)
+    photo = CloudinaryField('photo', blank=True, null=True)  # Use CloudinaryField
     role = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)    
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.full_name
@@ -107,7 +111,7 @@ class Service(models.Model):
     employee = models.ManyToManyField(Employee, related_name='services', blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='service_images/', blank=True, null=True)
+    image = CloudinaryField('image', blank=True, null=True)  # Use CloudinaryField
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     duration = models.PositiveIntegerField(help_text="Duration in minutes")
     preliminary_questions_type = models.CharField(max_length=20, choices=[('text', 'Text'), ('choice', 'Choice'), ('boolean', 'Boolean')], default='text')
@@ -172,11 +176,11 @@ class Appointment(models.Model):
     preliminary_answers = models.JSONField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('confirmed', 'Confirmed'), ('cancelled', 'Cancelled'), ('rescheduled', 'Rescheduled'), ('completed', 'Completed')], default='pending')
-    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    qr_code = CloudinaryField('qr_code', blank=True, null=True)  # Use CloudinaryField for QR codes
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.customer.full_name} - {self.service.title} on {self.slot.start_time}"
 
