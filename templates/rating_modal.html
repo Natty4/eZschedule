@@ -198,7 +198,9 @@
                     document.getElementById('rating-error-message').style.display = 'none';
                     modal.style.display = "none";
                     
+                    
                 } else {
+                    console.log(response, '------------');
                     throw new Error('Error submiting feedback');
                 }
             })
