@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = 'Creates a superuser if it does not already exist'
 
     def handle(self, *args, **options):
-        username = 'admin'  
+        username = 'admin1'  
         email = 'admin@ezgo.com'  
         password = settings.SUPERUSER_PASSWORD
 
@@ -19,7 +19,7 @@ class Command(BaseCommand):
         # Check if the superuser already exists
         if not User.objects.filter(username=username).exists():
             User.objects.create_superuser(username=username, email=email, password=password)
-            logger.info(f'Superuser {username} created successfully')
+            logger.info(f'Superuser {username}- -{password} created successfully')
             self.stdout.write(self.style.SUCCESS(f'Superuser {username} created successfully'))
         else:
             logger.info(f'Superuser {username} already exists')
