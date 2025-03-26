@@ -238,6 +238,11 @@
 
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script>
+
+        function viewServices(businessId) {
+            window.location.href = `/businesses/${businessId}/services/`;
+        }
+        
         let map, userMarker, locationCoords, searchCircle;
         
         function openLocationModal() {
@@ -455,7 +460,7 @@
                         <img src="${business.logo || '/static/img/default-business-logo.jpg'}" alt="${business.name} logo" style="width:50px;height:50px;margin-top:10px;"><br>
                         ${business.category.name}<br>
                         ${business.distance} km away<br>
-                        <a href="/businesses/${business.id}/services/" target="_blank">View Details</a>
+                        <a href="/businesses/${business.id}/services/">View Details</a>
                     `);
 
                 // Open the popup for this business immediately
