@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Services
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        
+        {% comment %} .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        } {% endcomment %}
+        
+
+        .service-list {
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .service-card {
+            display: flex; /* Use flexbox to align items */
+            justify-content: space-between; /* Space between content and the arrow */
+            align-items: center; /
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* margin: 20px 10px; */
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            text-align: left;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .service-card h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .service-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        
+        .arrow {
+            font-size: 30px;
+            color: #818cf8;
+            margin-left: auto; 
+            transition: transform 0.3s ease; 
+        }
+        
+        .service-card:hover .arrow {
+            transform: translateX(17px); 
+            color: #4f46e5; /* Change color on hover */
+            
+        }
+        .business-header-info {
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .business-header-info div {
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        .reviewer-name {
+            display: flex;
+            justify-content: space-between;
+            max-width: 100%;
+        }
+        .reviewer-name .date-time{
+            font-size: 12px;
+            color: #aaa;
+            right: 0;
+            display: inline-block;
+        }
+        .average-rating {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section class="business-header"  style="background:{% if business.image %} url({{business.image}}); {% else %} {{business.theme_color}}; {% endif %} background-size: cover;">
+        <div class="container">
+           
+            {% if business %}
+                <div class="business-header-content">
+                    <div class="business-logo">
+                        <img src="{{business.logo|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo">                        
+                        
+                    </div>
+                    <div class="business-header-info">
+                        <h1>{{business.name}}</h1>
+                        <div class="business-header-meta">
+                            <div class="business-category">
+                                <i class="fas fa-tag"></i>
+                                <span>{{business.category.name}}</span>
+                            </div>
+                            <div class="business-rating">
+                                <i class="fas fa-star"></i>
+                                <span>{{reviews.total_rating}} ({{reviews.reviews| length }} reviews)</span>
+                            </div>
+                            <div class="business-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{business.address}}</span>
+                            </div>
+                        </div>
+                        <div class="business-header-actions">
+                            <a href="tel:{{business.phone_number}}" class="btn btn-secondary">
+                                <i class="fas fa-phone"></i> Call
+                            </a>
+                            <a href="https://maps.google.com/?q={{business.address}}" target="_blank" class="btn btn-secondary">
+                                <i class="fas fa-directions"></i> Directions
+                            </a>
+                            <a href="#" class="btn btn-secondary">
+                                <i class="fas fa-share-alt"></i> Share
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+
+
+                <div id="business-header-content">
+                    <!-- Business header content will be loaded here -->
+
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading business details...</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="business-info">
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="services">Services</button>
+                <button class="tab-btn" data-tab="about">About</button>
+                <button class="tab-btn" data-tab="reviews">Reviews</button>
+                <button class="tab-btn" data-tab="team">Team</button>
+            </div>
+            
+            
+            <div id="services" class="tab-content active">
+                <h5>What type of appointment would you like to book?</h5>
+                <div id="services-grid" class="services-grid">
+                    <!-- Services will be loaded here -->
+                    {% if services %}
+                        {% for service in services %}
+                            <div class="service-card" onclick="viewServiceDetails('{{ business.id }}', '{{ service.id }}')">
+                                <h3>{{ service.title }}</h3>
+                                
+                                <div class="service-meta">
+                                    
+                                </div>
+                                <span class="arrow"> &gt; </span> 
+                                
+                            </div>
+                            
+                        {% endfor %}
+                    
+                    {% else %}
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading services...</p>
+                        </div>
+                        <div class="no-services-message">
+                            <p>No services available at this time.</p>
+                        </div>
+                    
+                    {% endif %}
+                </div>
+            </div>
+
+            
+            <div id="about" class="tab-content">
+                <h2>About</h2>
+                <div id="about-content">
+                    <p>{{ business.description|default:"No description available." }}</p>
+                </div>
+                
+                <div class="business-hours">
+                    <h3>Business Hours</h3>
+                  
+                    <div id="business-hours-list" class="hours-list">
+                        <!-- Business hours will be loaded here -->
+                        {% for bh in business_hours %}
+                            <li class="hours-item">
+                                <strong class="primary-color">{{ bh.day|capfirst|slice:"3" }}</strong> 
+                                {% if bh.is_closed %} 
+                                    <strong class="danger-color">Closed</strong> 
+                                {% else %} 
+                                    <strong class="open-close-time"> {{ bh.open_time|slice:"5" }} - {{ bh.close_time|slice:"5" }}</strong> 
+                                    <strong class="secondary-color">Open </strong>
+                                {% endif %}
+                            </li>
+                            
+                        {% endfor %}
+                    
+                    </div>
+                </div>
+                
+                <div class="business-location">
+                    <h3>Location</h3>
+                    <div id="business-location-info">
+                        <!-- Location info will be loaded here -->
+                        
+                    </div>
+                    
+                    <div id="map" class="map">
+                        <!-- Map will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="reviews" class="tab-content">
+                <div id="average-rating">
+                    <h2 class="primary-color">
+                        {{ reviews.total_rating  }} <i class="fas fa-star"></i>
+                    </h2>
+                    <button id="open-rating-modal" class="btn btn-primary" onclick="openModal(busines_id='{{business.id}}', service_id='{{service}}', staff_id='{{service}}', rating_type='business')">Add review</button>
+                    <!-- Average rating will be loaded here -->
+                </div>
+                <div class="reviews-summary">
+                    
+                    <div id="rating-breakdown">
+                        <!-- Rating breakdown will be loaded here -->
+                    </div>
+                    <div id="reviews-list">
+                        <!-- Reviews will be loaded here -->
+                        {% if reviews.reviews %}
+                            {% for review in reviews.reviews %}
+                                <div class="review-card">
+                                    <div class="review-header">
+                                        <div class="review-rating">
+                                            <span>{{ review.rating }}</span>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        
+                                        <div class="review-content">
+                                            <p>{{ review.comment }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="reviewer-name">
+                                        <span> 🤵 {{ review.user.first_name|default:"Anonymous" }} </span>
+                                        <span class="date-time"> {{ review.updated_at|slice:":10" }} {{ review.updated_at|slice:"11:16" }}</span>
+                                    </div>
+                                    
+                                </div>
+                                
+                            {% endfor %}
+                        {% else %}
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading reviews...</p>
+                            </div>
+                            <div class="no-reviews-message">
+                                <p>No reviews available at this time.</p>
+                            </div>
+                        {% endif %}
+                        
+                    </div>
+                    
+                </div>
+                
+                
+
+                {% include 'rating_modal.html' with busines=business.id rating_type="business" %}
+            
+            <div id="team" class="tab-content">
+                <h2>Our Team</h2>
+                <div id="team-grid" class="team-grid">
+                    <!-- Team members will be loaded here -->
+                    <div id="team-grid">
+                        {% if stafff%}
+                            {% for employee in staff %}
+                                <div class="team-member-card">
+                                    
+                                    <img src="{% if employee.photo %}{{ employee.photo }}{% else %}{{ 'img/avatar.png' }}{% endif %}" alt="{{ employee.full_name }}">
+
+                                    <h3>{{ employee.full_name }}</h3>
+                                    <p>{{ employee.role|default:"Staff" }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading team members...</p>
+                            </div>
+                            <div class="no-team-message">
+                                <p>No team members listed.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+
+       // document.getElementById('open-rating-modal').addEventListener("click", function() {
+        //    openModal();
+        // })
+
+        function formatTime(openTimeString, closeTimeString) {
+            const [open_hour, open_minute] = openTimeString.split(':');
+            const [close_hour, close_minute] = closeTimeString.split(':');
+
+            const open_date = new Date(`2025-01-01T${open_hour.trim()}:${open_minute.trim()}:00`);
+            const close_date = new Date(`2025-01-01T${close_hour.trim()}:${close_minute.trim()}:00`);
+            // Get the formatted time and remove leading zero from hour if it exists
+            let openFormattedTime = open_date.toLocaleTimeString([], { open_hour: '2-digit', open_minute: '2-digit' });
+            let closeFormattedTime = close_date.toLocaleTimeString([], { close_hour: '2-digit', close_minute: '2-digit' });
+            // Remove leading zero from the hour
+            openFormattedTime = openFormattedTime.replace(/^0/, '');  // Regex to remove leading zero
+            closeFormattedTime = closeFormattedTime.replace(/^0/, '');  
+            formattedTime = openFormattedTime + ' - ' + closeFormattedTime
+            return formattedTime;
+        };
+        function viewServiceDetails(businessId, serviceId) {
+            window.location.href = `/businesses/${businessId}/services/${serviceId}/`;
+        }
+    </script>
+
+{% endblock %}
+
+{% block footer %}
+{% endblock     %}

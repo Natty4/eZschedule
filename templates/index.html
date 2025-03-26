@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Home - 
+{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+
+{% block content %}
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Book appointments with ease</h1>
+                <p>Find and book appointments with your favorite businesses in just a few clicks</p>
+                <a href="{% url 'business_list' %}" class="btn btn-primary">Book Now</a>
+            </div>
+            <div class="hero-image">
+                <img src="img/hero-image.svg" alt="Booking illustration">
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why choose EasySchedule?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Find Businesses</h3>
+                    <p>Discover top-rated businesses in your area</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3>Book Appointments</h3>
+                    <p>Schedule appointments at your convenience</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>Get Reminders</h3>
+                    <p>Never miss an appointment with timely reminders</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Rate Services</h3>
+                    <p>Share your experience and help others</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="popular-categories">
+        <div class="container">
+            <h2 class="section-title">Popular Categories</h2>
+            <div class="categories-grid">
+                <a href="{% url 'business_list' %}?category=Health and Medical Services" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>Health & Medical</h3>
+                </a>
+                <a href="{% url 'business_list' %}?category=Personal Care Services" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <h3>Beauty & Spa</h3>
+                </a>
+                <a href="{% url 'business_list' %}?category=Fitness" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3>Fitness</h3>
+                </a>
+                <a href="{% url 'business_list' %}?category=Professional Services" class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3>Professional Services</h3>
+                </a>
+                
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to book your next appointment?</h2>
+                <p>Join thousands of satisfied customers who use EasySchedule every day</p>
+                <a href="{% url 'business_list' %}" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+

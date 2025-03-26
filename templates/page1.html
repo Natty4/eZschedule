@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}
+    Business Listing
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        {% comment %} .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+         {% endcomment %}
+        
+        .business-list {
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .business-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            margin: 20px 10px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+            max-width: 500px;
+            text-align: left;
+            display: flex;
+        }
+        
+        .business-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .business-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        
+        .business-details {
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+            margin-top: 20px;
+            margin-left: 15px;
+            padding: 10px 20px;
+            flex-grow: 1;
+            position: relative;
+            max-width: 70%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .business-details div{
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+           
+        }
+        
+        .business-details h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .business-details p {
+            font-size: 14px;
+            margin: 5px 0 0;
+        }
+
+        .business-details .green {
+            color: green;
+        }
+        
+        
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    {% if success_message %}
+        <div class="success message" id="success-message">
+            <p>{{ success_message }}</p>
+        </div>
+    {% endif %}
+    {% if error_message %}
+        <div class="message error" id="error-message">
+            <p>{{ error_message }}</p>
+        </div>
+    {% endif %}
+    <section class="page-header">
+        <div class="container">
+            <h1>Find Businesses</h1>
+            <p>Discover and book appointments with top-rated businesses</p>
+        </div>
+    </section>
+    
+    <section class="search-filter">
+        <div class="container">
+            <div class="search-box">
+                <form method='GET' action="{% url 'business_list' %}">
+                    <input type="text" name="search" id="search-input" placeholder="Search businesses..." value="{{ request.GET.search }}" required>
+                    <button type="submit" id="search-btn"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            <div class="filter-options">
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                    <option value="health">Health & Medical</option>
+                    <option value="beauty">Beauty & Spa</option>
+                    <option value="fitness">Fitness</option>
+                    <option value="professional">Professional Services</option>
+                </select>
+                <select id="rating-filter">
+                    <option value="">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    {% if not businesses %}
+        <section class="businesses-list">
+            <div class="container">
+                <div id="businesses-grid" class="businesses-grid">
+                    <!-- Businesses will be loaded here dynamically -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading businesses...</p>
+                    </div>
+                </div>
+                <div id="no-results" class="no-results hidden">
+                    <i class="fas fa-search"></i>
+                    <p>No businesses found matching your criteria.</p>
+                    <button id="reset-filters" class="btn btn-secondary">Reset Filters</button>
+                </div>
+            </div>
+        </section>
+    {% else %}
+
+        <div class="container">
+            <div class="business-list">
+                {% for business in businesses %}
+                <div class="business-card" onclick="viewServices('{{ business.id }}')" style="background: url({{ business.image }}); background-size: cover;">
+                    <!-- Check if the business has a logo. If not, use the default logo -->
+                    <img src="{{business.logo|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo"> 
+                    
+                    <div class="business-details" style="background:{{business.theme_color}};">
+                        <h2>{{ business.name }}</h2>
+                        <p><strong class="green">({{ business.num_services }})</strong> services available</p>
+                        <div class="business-category">
+                            <i class="fas fa-tag"></i>
+                            <span>{{business.category.name}}</span>
+                        </div>
+                        <div class="business-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{business.address}}</span>
+                        </div>
+                    </div>
+                    
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    {% endif %}
+
+    <script>
+        function viewServices(businessId) {
+            window.location.href = `/businesses/${businessId}/services/`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function (){
+            var successMessage = document.getElementById('success-message')
+            var errorMessage = document.getElementById('error-message')
+
+            if (successMessage){
+                successMessage.style.display = 'block';
+            }
+            if (errorMessage){
+                errorMessage.style.display = 'block';
+            }
+            
+        });
+    </script>
+{% endblock %}

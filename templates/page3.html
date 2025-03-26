@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ service.name }} Details
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        
+        .business-header{
+            max-height: 100px;
+            padding: 5px 3px; 
+            display: flex;
+            flex-direction: row;
+        }
+        .business-header-content{            
+            flex-direction: row;
+            justify-content: left;
+        }
+
+        .business-header-content .business-logo{
+            width: 70px;
+            height: 70px;
+        }
+        .business-header-info {
+            margin-bottom: -12px;
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        
+        .business-header-info a {
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+            text-decoration: none;
+        }
+        #open-rating-modal {
+            cursor: pointer;
+        }
+        
+        
+    </style>
+{% endblock %}
+
+{% block content %}
+
+{% if error_message %}
+    <div class="error message" id="error-message">
+        <p>{{ error_message }}</p>
+
+    </div>
+{% endif %}
+{% if success_message %}
+    <div class="success message" id="success-message">
+        <p>{{ success_message }}</p>
+
+    </div>
+{% endif %}
+
+
+<section class="business-header" style="background:{{business.theme_color}}">
+    <div class="container">
+        {% if business %}
+            <div class="business-header-content">
+                {% comment %} <div class="business-logo">
+                    {% if business.logo %}
+                        <img src="{{ business.logo }}" 
+                        alt="{{ business.name }} logo" class="logo">
+                    {% else %}
+                        <img src="https://img.freepik.com/premium-vector/simple-letter-n-company-logo_197415-6.jpg" 
+                        alt="{{ business.name }} logo" class="logo">
+                    {% endif %}
+                    
+                </div> {% endcomment %}
+                <div class="business-header-info">
+                    <a href="{% url 'service_list' business.id %}">
+                        <h1>{{business.name}}</h1>
+                    </a>
+                  
+                </div>
+            </div>
+        {% else %}
+
+
+            <div id="business-header-content">
+                <!-- Business header content will be loaded here -->
+
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading business details...</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+<section class="booking-process">
+    <div class="container">
+        <div class="date-picker">
+            
+            <div class="date-input-wrapper">
+                <button class="arrow-button"  id="prev-day" title="Previous Day" style="color:{{business.theme_color}}">
+                    &lt;
+                </button>
+                <input type="date" id="date-picker" name="date">
+                <button class="arrow-button" id="next-day" title="Next Day" style="color:{{business.theme_color}}">
+                    &gt;
+                </button>
+            </div>
+        </div>
+        <div id="professionals-grid" class="professionals">
+            {% for professional in professionals %}
+                <div class="professional-card" data-professional-id="{{ professional.id }}">
+                    <div class="profile">
+                        <div class="image">
+                            <img src="{{professional.photo|default:"/static/img/avatar.png"}}" alt="{{ professional.full_name }}">
+                        </div>
+                        <div class="details">
+                            <p class="profile-role">{{ professional.role }}</p>
+                            <p class="profile-name"><strong>{{ professional.full_name }}</strong></p>
+                            <div class="star-rating">
+                                {% for star in "12345"|make_list %}
+                                    <span id="open-rating-modal" class="star" onclick="openModal(business_id='{{business.id}}', service_id='{{service.id}}', staff_id='{{professional.id}}', rating_type='employee')">
+                                        {% if star|add:0 <= professional.total_rating %}
+                                            &#9733;
+                                        {% else %}
+                                            &#9734;
+                                        {% endif %}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="time-slots-{{ professional.id }}" class="time-slots">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading...  please pick a date above</p>
+                        </div>
+                    </div>
+        
+                    <div id="unavailable-message-{{ professional.id }}" class="unavailable-slot" style="display:none;">
+                        <p>I'm not available for the selected Date.</p>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading professionals...</p>
+                </div>
+            {% endfor %}
+        </div>
+        
+
+        <!-- Continue Button -->
+        <div class="continue-button">
+            <button class="btn btn-primary" id="continue-button" disabled style="background:{{business.theme_color}}">Continue</button>
+        </div>
+    </div>
+</section>
+
+<section class="service-header">
+    <div class="container">
+        <div id="service-header-content">
+            <!-- Service header content dynamically loaded -->
+            <div class="service-summary">
+                <p><strong> {{ service.title }}</strong></p>
+                <p>Duration: <strong>Approximately {{ service.duration }} minutes</strong></p>
+                <p>BOOKING FEE: <strong> 100. ETB</strong></p>
+                {% comment %} <p>BOOKING FEE: <strong>{{ service.price }} </strong></p> {% endcomment %}
+            </div>
+        </div>
+    </div>
+</section>
+
+    {% include 'rating_modal.html' with busines=business.id rating_type="employee" %}
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+    let selectedDate = '';
+    let selectedTime = '';
+    let selectedProfessionalId = null;
+
+    window.onload = function() {
+        const today = new Date();
+
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1;
+        let dd = today.getDate();
+
+        if (mm < 10 ) mm = '0' + mm;
+        if (dd < 10 ) dd = '0' + dd;
+
+        const formattedDate = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('date-picker').value = formattedDate;
+        selectedDate = formattedDate;
+        loadAvailableSlotsForProfessionals(selectedDate);
+
+    }
+    const data = {
+        business: "{{ business.id }}",
+        service: "{{ service.id }}"
+    };
+
+
+    // Parse available slots from the passed JSON context variable
+    const availableSlots = JSON.parse('{{ available_slots_json|escapejs }}');
+    
+    // Handle the date selection change
+    document.getElementById('date-picker').addEventListener('change', function(event) {
+        selectedTime = '';
+        selectedDate = new Date(event.target.value).toISOString().split('T')[0];
+        loadAvailableSlotsForProfessionals(selectedDate);
+        removeOtherSelections(professionalId, slotItem);
+        const continueButton = document.getElementById('continue-button');
+        continueButton.disabled = true;
+    });
+
+    // Handle Date Toggler buttons
+    document.getElementById('prev-day').addEventListener('click', function() {
+        let newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() - 1);
+        selectedDate = newDate.toISOString().split('T')[0];
+        document.getElementById('date-picker').value = selectedDate;
+        loadAvailableSlotsForProfessionals(selectedDate);
+    });
+
+    document.getElementById('next-day').addEventListener('click', function() {
+        let newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() + 1);
+        selectedDate = newDate.toISOString().split('T')[0];
+        document.getElementById('date-picker').value = selectedDate;
+        loadAvailableSlotsForProfessionals(selectedDate);
+    });
+
+
+    function loadAvailableSlotsForProfessionals(selectedDate) {
+        {% for professional in professionals %}
+            var professionalId = "{{ professional.id }}";
+            var timeSlotsContainer = document.getElementById('time-slots-' + professionalId);
+            var unavailableMessage = document.getElementById('unavailable-message-' + professionalId);
+            
+            // Initialize an empty array to store the slots for the selected date
+            var slotsForSelectedDate = [];
+            
+            // Find the slots for this professional that match the selected date
+            var professionalAvailableSlots = availableSlots[professionalId];
+            if (professionalAvailableSlots) {
+                professionalAvailableSlots.forEach(availableSlot => {
+                    // Check if the date matches
+                    if (availableSlot.date === selectedDate) {
+                        slotsForSelectedDate = availableSlot.slots;
+                    }
+                });
+            }
+
+            // If we found slots, display them; otherwise, show the unavailable message
+            if (slotsForSelectedDate.length > 0) {
+                timeSlotsContainer.innerHTML = ''; 
+                slotsForSelectedDate.forEach(slot => {
+                    var startTime = slot.start_time.split('-').slice(-1).join(':');
+                    var endTime = slot.end_time.split('-').slice(-1).join(':');
+                    var slotItem = document.createElement('div');
+                    var formattedStartTime = formatStartTime(slot.start_time);
+                    
+                    slotItem.classList.add('time-slot-item');
+                    //slotItem.style.background = '{{business.theme_color}}';
+                    slotItem.textContent = formattedStartTime;
+                    slotItem.addEventListener('click', function() {
+                        selectedProfessionalId = professionalId;
+                        selectedTime = `${startTime} - ${endTime}`;
+                        slotItem.classList.toggle('selected');
+                        // Remove selected class from every other slot
+                        removeOtherSelections(professionalId, slotItem);
+                        updateContinueButton();
+                    });
+                    timeSlotsContainer.appendChild(slotItem);
+                });
+                unavailableMessage.style.display = 'none';
+            } else {
+                const continueButton = document.getElementById('continue-button');
+                continueButton.disabled = true;
+                timeSlotsContainer.innerHTML = ''; 
+                unavailableMessage.style.display = 'block';
+                
+                
+            }
+        {% endfor %}
+    }
+
+
+    // Function to format the start time in AM/PM format
+    function formatStartTime(startTimeString) {
+        const [hour, minute] = startTimeString.split('-').slice(-1)[0].split(':');
+        const date = new Date(`2025-01-01T${hour}:${minute}:00`);
+    
+        // Get the formatted time and remove leading zero from hour if it exists
+        let formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+        // Remove leading zero from the hour if necessary
+        formattedTime = formattedTime.replace(/^0/, '');  // Regex to remove leading zero
+    
+        return formattedTime;
+    }
+
+    // Function to remove selected class from other slots when one is selected
+    function removeOtherSelections(professionalId, selectedSlot) {
+        const allSlotItems = document.querySelectorAll(`.time-slot-item`);
+        allSlotItems.forEach(slot => {
+            if (slot !== selectedSlot) {
+                slot.classList.remove('selected');
+            }
+        });
+    }
+
+    function updateContinueButton() {
+        const continueButton = document.getElementById('continue-button');
+        if (selectedDate && selectedTime && selectedProfessionalId) {
+            continueButton.disabled = false;
+        } else {
+            continueButton.disabled = true;
+        }
+    }
+
+    document.getElementById('continue-button').addEventListener('click', function() {
+        const url = `/booking-form/${encodeURIComponent(data.business)}/${encodeURIComponent(data.service)}/${encodeURIComponent(selectedProfessionalId)}/${encodeURIComponent(selectedDate)}/${encodeURIComponent(selectedTime)}`;
+        window.location.href = url;
+    });
+
+    document.addEventListener('DOMContentLoaded', function (){
+        var successMessage = document.getElementById('success-message')
+        var errorMessage = document.getElementById('error-message')
+
+        if (successMessage){
+            successMessage.style.display = 'block';
+        }
+        if (errorMessage){
+            errorMessage.style.display = 'block';
+        }
+        
+    });
+</script>
+
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+
+
+

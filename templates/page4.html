@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Personal Information
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            align-items: center;
+            padding: 0;
+        }
+        
+        h1 {
+            color: #28A745;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .booking-summary, .user-form {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px 10px;
+            padding: 20px;
+            text-align: left;
+        }
+        
+        .booking-summary h2, .user-form h2 {
+            color: #333;
+        }
+        
+        .booking-summary p, .user-form p {
+            color: #666;
+            font-size: 14px;
+        }
+        .user-form {
+            max-width: 100%;
+            padding-right: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        input, textarea {
+            margin: 4px 2px;
+            padding: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .form-group input, .form-group textarea {
+            padding: 10px;
+        }
+        button {
+            background-color: #28A745;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28A745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        
+        .btn-submit:hover {
+            background-color: #1e3348;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            background-color: #f8d7da;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px 10px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+
+
+<section class="booking-process">
+    
+    <div class="container">
+
+        <div class="booking-steps">
+            <div class="step active" id="select-staff">
+                <div class="step-number">1</div>
+                <div class="step-text">Select Professional</div>
+            </div>
+            <div class="step " id="select-time">
+                <div class="step-number">2</div>
+                <div class="step-text">Choose Time</div>
+            </div>
+            <div class="step " id="personal-detail">
+                <div class="step-number">3</div>
+                <div class="step-text">Your Details</div>
+            </div>
+            <div class="step " id="confirm-step">
+                <div class="step-number">4</div>
+                <div class="step-text">Confirmation</div>
+            </div>
+        </div>
+        <div class="form-container">
+            {% if error_message %}
+                <div class="error message" id="error-message">
+                    <p>{{ error_message }}</p>
+
+                </div>
+            {% endif %}
+            {% if success_message %}
+                <div class="success message" id="success-message">
+                    <p>{{ success_message }}</p>
+
+                </div>
+            {% endif %}
+            <div id="step-3" class="booking-s",>
+                <div class="customer-form">
+                    <h2>Personal Information</h2>
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="full_name">Full Name</label>
+                            <input value="{{user_data.customer.full_name}}" type="text" id="full_name" name="full_name" required autofocus>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_number">Passport/ID Number (optional)</label>
+                            <input value="{{user_data.customer.id_number}}" type="text" id="id_number" name="id_number">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input value="{{user_data.customer.email}}" type="email" id="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number</label>
+                            <input value="{{user_data.customer.phone_number}}" type="tel" id="phone_number" name="phone_number" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" required> {{user_data.customer.address}} </textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select  id="gender" name="gender"> 
+                                <option value="{{user_data.customer.gender}}">--{{user_data.customer.gender|capfirst}}--</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="notes">Notes (optional)</label>
+                            <textarea id="notes" name="notes"> {{user_data.customer.notes}} </textarea>
+                        </div>
+
+                        <input value="{{user_data.customer.tg}}" type="hidden" name="tg_id" value="{{ tg_id }}">
+                        <button type="submit" class="btn btn-primary" id="proceed-to-step-4">Book Appointment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section class="service-header">
+    <div class="container">
+        <div id="service-header-content">
+            <!-- Service header content dynamically loaded -->
+          
+            <div class="professional-card">
+                <div class="profile">
+                    <div class="image">
+                        <img src="{{staff.photo|default:"/static/img/avatar.png"}}" alt="{{ staff.full_name }}">
+                    </div>
+                    <div class="details">
+                        <p class="profile-role">{{ staff.role }}</p>
+                        <p class="profile-name"><strong>{{ staff.full_name }}</strong></p>
+
+                        <div class="star-rating">
+                            {% for star in "12345"|make_list %}
+                                <span class="star">
+                                    {% if star|add:0 <= staff.total_rating %}
+                                        &#9733;
+                                    {% else %}
+                                        &#9734;
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <p><strong>Service:</strong> {{ service.title }}</p>
+                <p><strong>Appointment:</strong> {{ date }}, {{ time }}</p>
+                <p><strong>Service Price:</strong> {{ service.price }} ETB</p>
+                <p><strong>Booking Fee:</strong> {{ booking_fee|default:100 }} ETB</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+    
+    document.getElementById("select-time").classList.add("active");
+
+
+    document.addEventListener('DOMContentLoaded', function (){
+        var successMessage = document.getElementById('success-message')
+        var errorMessage = document.getElementById('error-message')
+
+        if (successMessage){
+            successMessage.style.display = 'block';
+        }
+        if (errorMessage){
+            errorMessage.style.display = 'block';
+        }
+        
+    });
+
+</script>
+{% endblock %}
+
+{% block footer%}
+{% endblock %}

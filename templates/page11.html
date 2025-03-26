@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Business Listing
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <style>
+        /* Map */
+        #map { height: 350px; width: 100%; margin: 20px 0; }
+        .map-controls { 
+            display: flex;     
+            justify-content: space-between; 
+            margin: 20px 0; 
+        }
+        .map-controls button { 
+            padding: 10px 20px; 
+            border-radius: 5px;  
+            border: none; 
+            cursor: pointer; 
+        }
+        .map-controls input { 
+            padding: 10px; 
+            border-radius: 5px; 
+            border: 1px solid #ddd;  
+            margin: 0 10px;
+        }
+        .business-list {
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .business-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            margin: 20px 10px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+            max-width: 500px;
+            text-align: left;
+            display: flex;
+        }
+        
+        .business-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .business-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        
+        .business-details {
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+            margin-top: 20px;
+            margin-left: 15px;
+            padding: 10px 20px;
+            flex-grow: 1;
+            position: relative;
+            max-width: 70%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .business-details div{
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .business-details h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .business-details p {
+            font-size: 14px;
+            margin: 5px 0 0;
+        }
+
+        .business-details .green {
+            color: green;
+        }
+
+        /* Modal */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content { 
+            background-color: #fff; 
+            padding: 20px; 
+            width: 90%; 
+            max-width: 900px; 
+            border-radius: 10px; 
+            position: relative;
+        }
+        .close { 
+            position: absolute; 
+            top: 10px; right: 15px; 
+            font-size: 20px; cursor: pointer;
+        }
+        .map-controls { display: flex; justify-content: space-between; margin: 20px 0; }
+
+        /* Fullscreen modal style */
+        .modal-content.full-screen {
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            max-height: none;
+            border-radius: 0;
+            margin: 0;
+            #map { height: 70%; }
+        }
+
+        /* Responsive Fixes */
+        @media (max-width: 768px) {
+            .modal-content { width: 95%; }
+            .business-list { grid-template-columns: 1fr; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% if success_message %}
+        <div class="success message" id="success-message">
+            <p>{{ success_message }}</p>
+        </div>
+    {% endif %}
+    {% if error_message %}
+        <div class="error message" id="error-message">
+            <p>{{ error_message }}</p>
+        </div>
+    {% endif %}
+    <div class="info message" id="info-message">
+        
+    </div>
+    <section class="page-header">
+        <div class="container">
+            <h1>Find Businesses</h1>
+            <p>Discover and book appointments with top-rated businesses</p>
+        </div>
+    </section>
+
+    <!-- Search & Location Filter -->
+    <section class="search-filter">
+        <div class="container">
+            <div class="search-box">
+                <form method="GET" action="{% url 'business_list' %}" style="display: flex; flex-grow: 1;">
+                    <input type="text" name="search" id="search-input" placeholder="Search businesses..." value="{{ request.GET.search }}" required>
+                    <button type="submit" id="search-btn"><i class="fas fa-search"></i></button>
+                </form>
+            </div>
+            <div class="filter-options">
+                <button class="btn" onclick="openLocationModal()">Find Nearby
+                    <i class="fas fa-location"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Business List -->
+    {% if not businesses %}
+        <section class="businesses-list">
+            <div class="container">
+                <div id="businesses-grid" class="businesses-grid">
+                    <!-- Businesses will be loaded here dynamically -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading businesses...</p>
+                    </div>
+                </div>
+                <div id="no-results" class="no-results hidden">
+                    <i class="fas fa-search"></i>
+                    <p>No businesses found matching your criteria.</p>
+                    <button id="reset-filters" class="btn btn-secondary">Reset Filters</button>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <div class="container">
+            <div id="business-list" class="business-list">
+                {% for business in businesses %}
+                <div class="business-card" onclick="viewServices('{{ business.id }}')" style="background: url({{ business.image }}); background-size: cover;">
+                    <img src="{{business.logo|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo"> 
+                    
+                    <div class="business-details" style="background:{{business.theme_color}};">
+                        <h2>{{ business.name }}</h2>
+                        <p><strong class="green">({{ business.num_services }})</strong> services available</p>
+                        <div class="business-category">
+                            <i class="fas fa-tag"></i>
+                            <span>{{business.category.name}}</span>
+                        </div>
+                        <div class="business-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{business.address}}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Location Modal -->
+    <div id="location-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLocationModal()">&times;</span>
+            <h2>Select Location & Distance</h2>
+            <div class="map-controls">
+                <button class="btn" onclick="getLocation()">Use My Location</button>
+                <input type="number" id="radius" placeholder="Distance (km) eg. 10" value="" min="1"> 
+                <button class="btn" onclick="findNearbyBusinesses()">Find <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div id="map"></div>
+
+            <div id="business-count" style="padding: 10px; text-align: center; font-weight: bold; color: #4f46e5; cursor: pointer;"></div>
+        
+            <p id="location-info"></p>
+            <button id="fullscreen-btn" class="btn" onclick="toggleFullScreen()">View Full Screen</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        let map, userMarker, locationCoords, searchCircle;
+        
+        function openLocationModal() {
+            document.getElementById("location-modal").style.display = "flex";
+            initMap();
+            getLocation();
+            document.querySelector('.modal-content').classList.remove('full-screen');
+            document.getElementById("fullscreen-btn").textContent = "View Full Screen";
+        }
+        
+        // Function to close the modal
+        function closeLocationModal() {
+            const modal = document.getElementById("location-modal");
+            if (modal) modal.style.display = "none";
+            resetMap();
+        }
+        
+        function initMap() {
+           //  map = L.map('map').setView([0, 0], 2);
+            map = L.map('map', {
+                center: [0, 0],  // Starting position
+                zoom: 2,  // Starting zoom level
+                minZoom: 2  // Minimum zoom level (prevents zooming out beyond this level)
+            });
+            
+            // Google Satellite View
+            L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+                maxZoom: 20,
+                subdomains:['mt0','mt1','mt2','mt3']
+            }).addTo(map);
+        
+            map.on('click', function(e) {
+                locationCoords = e.latlng;
+                updateUserMarker(e.latlng);
+                updateSearchCircle(locationCoords);
+            });
+        }
+        
+        function resetMap() {
+            if (map) {
+                map.remove();
+                map = null;
+                locationCoords = null;
+                userMarker = null;
+                if (searchCircle) map.removeLayer(searchCircle);
+                document.getElementById("radius").value = 10;
+            }
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    locationCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    updateUserMarker(locationCoords);
+                    updateSearchCircle(locationCoords);
+                }, (error) => {
+                    alert("Location access denied. Please manually select a location on the map.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+
+        
+        function updateUserMarker(coords) {
+            if (userMarker) map.removeLayer(userMarker);
+        
+            // Create a circle marker with red color
+            userMarker = L.circleMarker(coords, {
+                color: 'red',      // Border color of the circle
+                fillColor: 'red',  // Fill color of the circle
+                fillOpacity: 0.7,  // Fill opacity
+                radius: 10         // Size of the circle
+            }).addTo(map)
+            .bindPopup("You are here")
+            .openPopup();
+        
+            // Fetch location name using reverse geocoding (using OpenStreetMap Nominatim API)
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`)
+                .then(response => response.json())
+                .then(data => {
+                    const placeName = data.display_name || "Unknown location"; // Fallback in case the name is not found
+                    userMarker.setPopupContent(`<b>You are here</b><br>${placeName}`);
+                })
+                .catch(error => {
+                    console.error('Error fetching location name:', error);
+                    userMarker.setPopupContent("You are here");
+                });
+        
+            // Center the map to the user's location
+            map.setView(coords, 13);
+        }
+        
+
+        function updateSearchCircle(coords) {
+            if (searchCircle) map.removeLayer(searchCircle);
+            let radius = document.getElementById("radius").value || 5;
+            searchCircle = L.circle(coords, { radius: radius * 1000, color: 'green', fillColor: '#00ffff', fillOpacity: 0.1 }).addTo(map);
+        }
+
+        
+
+        function findNearbyBusinesses() {
+            if (!locationCoords) {
+                alert("Please select a location first.");
+                return;
+            }
+
+            let radius = document.getElementById("radius").value || 10;
+            radius = parseInt(radius);  // Convert the radius to an integer
+
+            // Hide the previous info/error message
+            const infoBlock = document.getElementById("info-message");
+            infoBlock.style.display = "none";  
+
+            // Remove previous business markers and the search circle, but keep the user marker
+            clearExistingMarkers();
+
+            // Make the API call to get nearby businesses
+            fetch(`/go/api/find-nearby-businesses/?lat=${locationCoords.lat}&lng=${locationCoords.lng}&radius=${radius}`)
+                .then(response => response.json())
+                .then(data => {
+                    const businessCount = data.businesses ? data.businesses.length : 0;
+                    document.getElementById('business-count').textContent = `${businessCount} business${businessCount === 1 ? '' : 'es'} found`;
+
+                    if (data.businesses && data.businesses.length > 0) {
+                        displayBusinesses(data.businesses);  // Show the businesses in the modal
+                        drawCircleAroundUser(locationCoords, radius);  // Draw the search radius circle
+                    } else {
+                        const infoBlock = document.getElementById("info-message");
+                        infoBlock.style.display = "block";
+                        infoBlock.textContent = `No businesses found within ${radius} km of the selected location. Please try again with a larger distance.`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching nearby businesses:", error);
+                    const infoBlock = document.getElementById("info-message");
+                    infoBlock.style.display = "block";
+                    infoBlock.textContent = "An error occurred while fetching businesses. Please try again later.";
+                });
+        }
+
+        // Function to remove previous business markers and the search circle, but keep the user marker
+        function clearExistingMarkers() {
+            if (map) {
+                // Remove all markers from the map (except user marker)
+                map.eachLayer(function(layer) {
+                    if (layer instanceof L.Marker && layer !== userMarker) {
+                        map.removeLayer(layer);
+                    }
+                });
+
+                // Remove the previous search circle if it exists
+                if (searchCircle) {
+                    map.removeLayer(searchCircle);
+                }
+            }
+        }
+
+        // Function to display businesses on the map
+        function displayBusinesses(businesses) {
+            const businessList = document.getElementById("business-list");
+            let bounds = L.latLngBounds();  // This is for adjusting the map view to fit all markers
+            businessList.innerHTML = "";  // Clear old results  
+
+            businesses.forEach(business => {
+                let businessCard = document.createElement("div");
+                businessCard.classList.add("business-card");
+                businessCard.innerHTML = `
+                    <img src="${business.logo || '/static/img/default-business-logo.jpg'}"
+                        alt="${business.name} logo" class="business-logo">
+                    <div class="business-details" style="background:${business.theme_color};">
+                        <h2>${business.name}</h2>
+                        <div class="business-category">
+                            <i class="fas fa-tag"></i>
+                            <span>${business.category.name}</span>
+                        </div>
+                        <div class="business-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${business.address}</span>
+                        </div>
+                        <div class="business-distance">
+                            <i class="fas fa-map-pin"></i>
+                            <span>${business.distance} km away</span>
+                        </div>
+                    </div>
+                `;
+                businessCard.onclick = () => window.location.href = `/businesses/${business.id}/services/`;
+                businessList.appendChild(businessCard);
+
+                // Create marker for the business and bind a popup
+                const marker = L.marker([business.latitude, business.longitude]).addTo(map)
+                    .bindPopup(`
+                        <b>${business.name}</b><br>
+                        <img src="${business.logo || '/static/img/default-business-logo.jpg'}" alt="${business.name} logo" style="width:50px;height:50px;margin-top:10px;"><br>
+                        ${business.category.name}<br>
+                        ${business.distance} km away<br>
+                        <a href="/businesses/${business.id}/services/" target="_blank">View Details</a>
+                    `);
+
+                // Open the popup for this business immediately
+                marker.openPopup();
+                // Extend the bounds to include this business marker
+                bounds.extend(marker.getLatLng());
+            });
+
+            // After all markers are added, adjust the map view to fit the bounds
+            if (businesses.length > 0) {
+                map.fitBounds(bounds, { maxZoom: 15 });
+            }
+        }
+
+        // Function to draw a circle around the user's location or selected location
+        function drawCircleAroundUser(locationCoords, radius) {
+            // If there's already a circle, remove it
+            if (searchCircle) {
+                map.removeLayer(searchCircle);
+            }
+
+            // Draw the circle centered at the user’s location (or pinned location)
+            searchCircle = L.circle([locationCoords.lat, locationCoords.lng], {
+                radius: radius * 1000,  // Convert radius to meters (1 km = 1000 meters)
+                color: 'green',
+                fillColor: '#00ffff',
+                fillOpacity: 0.1
+            }).addTo(map);
+        }
+
+
+        function toggleFullScreen() {
+            const modalContent = document.querySelector('.modal-content');
+            const fullscreenButton = document.getElementById("fullscreen-btn");
+    
+            // Toggle full-screen class
+            modalContent.classList.toggle('full-screen');
+    
+            // Change button text based on full-screen state
+            if (modalContent.classList.contains('full-screen')) {
+                fullscreenButton.textContent = "Exit Full Screen";
+            } else {
+                fullscreenButton.textContent = "View Full Screen";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Your other code here
+        
+            // Add event listener for the business-count element
+            const businessCountElement = document.getElementById('business-count');
+            
+            if (businessCountElement) {
+                businessCountElement.addEventListener('click', function () {
+                    // Close the modal when clicked
+                    closeLocationModal();
+                });
+            }
+        
+        });
+
+        document.addEventListener('DOMContentLoaded', function (){
+            var successMessage = document.getElementById('success-message')
+            var errorMessage = document.getElementById('error-message')
+
+            if (successMessage){
+                successMessage.style.display = 'block';
+            }
+            if (errorMessage){
+                errorMessage.style.display = 'block';
+            }
+            
+        });
+
+    </script>
+{% endblock %}

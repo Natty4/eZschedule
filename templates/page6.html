@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Thank You
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .qr, .qr div {
+            align-items: center;
+            display:flex;
+            flex-direction: column;
+        }
+        .card h3 {
+            margin-bottom: 15px;
+        }
+        
+        
+        .card p {
+            color: #666;
+            font-size: 12px;
+        }
+        .card p strong {
+            color: #333;
+            font-size: 20px;
+        }
+        .approval{
+            border: 1px solid #28A745;
+            padding: 20px 20px;
+            background: none;
+            max-height: 90px;
+
+        }
+        
+        .personal{
+            text-align: left;
+
+        }
+        h1 {
+            margin-top: 0;
+        }
+        p {
+            margin: 10px 0;
+        }
+       
+        .qrc{
+            width: 200px;
+            height: 200px;
+        }
+        /* Responsive design */
+        @media (min-width: 768px) {
+            .cards-wrapper {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+            .card {
+                flex: 1;
+                
+            }
+            
+        }
+        .business-header-info h1{
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .business-header-info div {
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Emoji Rain Container -->
+<div class="emoji-rain" id="emojiRain">
+
+</div>
+<section class="business-header"  style="background:{% if business_data.business.image %} url({{business_data.business.image}}); {% else %} {{business_data.business.theme_color}}; {% endif %} background-size: cover;">
+    <div class="container">
+        {% if business_data %}
+            <div class="business-header-content">
+                <div class="business-logo">
+                    {% if business_data.business.logo %}
+                        <img src="{{ business_data.business.logo }}" 
+                        alt="{{ business_data.business.name }} logo" class="business-logo">
+                    {% else %}
+                        <img src="{% static 'img/default-business-logo.jpg' %}"
+                        alt="{{ business.name }} logo" class="business-logo">
+                    {% endif %}
+                    
+                </div>
+                <div class="business-header-info">
+                    <h1>{{business_data.business.name}}</h1>
+                    <div class="business-header-meta">
+                        <div class="business-category">
+                            <i class="fas fa-tag"></i>
+                            <span>{{business_data.business.category.name}}</span>
+                        </div>
+                        <div class="business-rating">
+                            <i class="fas fa-star"></i>
+                            <span>{{business_data.reviews.total_rating}} ({{business_data.reviews| length }} reviews)</span>
+                        </div>
+                        <div class="business-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{business_data.business.address}}</span>
+                        </div>
+                    </div>
+                    <div class="business-header-actions">
+                        <a href="tel:{{business_data.business.phone_number}}" class="btn btn-secondary">
+                            <i class="fas fa-phone"></i> Call
+                        </a>
+                        <a href="https://maps.google.com/?q={{business_data.business.address}}" target="_blank" class="btn btn-secondary">
+                            <i class="fas fa-directions"></i> Directions
+                        </a>
+                        <a href="#" class="btn btn-secondary">
+                            <i class="fas fa-share-alt"></i> Share
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+
+
+            <div id="business-header-content">
+                <!-- Business header content will be loaded here -->
+
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading business details...</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="booking-process">
+    <div class="container">
+        <div class="booking-steps">
+            <div class="step active" id="select-staff">
+                <div class="step-number">1</div>
+                <div class="step-text">Select Professional</div>
+            </div>
+            <div class="step " id="select-time">
+                <div class="step-number">2</div>
+                <div class="step-text">Choose Time</div>
+            </div>
+            <div class="step " id="personal-detail">
+                <div class="step-number">3</div>
+                <div class="step-text">Your Details</div>
+            </div>
+            <div class="step " id="confirm-step">
+                <div class="step-number">4</div>
+                <div class="step-text">Confirmation</div>
+            </div>
+        </div>
+        {% if error_message %}
+            <div class="error message" id="error-message">
+                <p>{{ error_message }}</p>
+            </div>
+
+        {% elif success_message %}
+            <div class="message success" id="success-message">
+                <p>{{ success_message }}</p>
+            </div>
+
+            <div class="cards-wrapper">
+                <div class="card approval">
+                    <h4>Success!</h4>
+                    <p>Thank You for making your appointment!</p>
+
+                </div>
+                <div class="card personal">
+                    <h4>Personal Info</h4>
+                    <p>👤 {{ customer.full_name }}</p>
+                    <p>📱 {{ customer.phone_number }}</p>
+                    <p>📍 {{ customer.address }}</p>
+                    <p>📝 {{ appointment.notes }}</p>
+                    <h5>{{ service.title }}</h5>
+                    <hr>
+
+                    <p>💵 Service Price: {{ service.price }} ETB</p>
+                    <p>💸 Payed Amount: {{ payment.amount }} {{ payment.currency }} </p>
+                    <p>💳 Method: {{ payment.method }} </p>
+                    <p>✔️ Payment status: {{ payment.status }} </p>
+                    
+                </div>
+                <div class="card qr">
+                    <h4>Appointment QR Code</h4>
+                    <image src="{{ qr }}" class="qrc"/>
+                    <p>Present this QR code at the entrance.</p>
+                    
+                    <div class="">
+                        <button class="btn btn-primary" onclick="window.print()">
+                            <i class="fas fa-download"></i>
+                            Get Invoice 
+                        </button>
+                        <p>View and save the full receipt for your reference.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <a href="{% url 'business_list' %}" class="">Back to Home</a> | 
+                <a href="#" onclick="addToCalendar()" class="">Add to Calendar</a>
+            </div>
+        {% endif %}
+        
+    </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+
+        // Emojis to be used in the rain
+        const emojis = ["🎉", "🎆", "✨", "🍾", "🌟", "💥", "🎊"];
+
+        // Function to create emoji rain
+        function createEmojiRain() {
+            const container = document.getElementById('emojiRain');
+            const numberOfEmojis = 45; // You can adjust the number of emojis
+
+            for (let i = 0; i < numberOfEmojis; i++) {
+                const emoji = document.createElement('div');
+                emoji.classList.add('emoji');
+
+                // Set random emoji
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+
+                // Randomize position and speed
+                const randomX = Math.random() * window.innerWidth;
+                const randomDuration = Math.random() * 3 + 2; // Random speed between 2-5s
+
+                emoji.style.left = `${randomX}px`;
+                emoji.style.animationDuration = `${randomDuration}s`;
+                emoji.style.fontSize = `${Math.random() * 3 + 0.5}rem`; // Random size for variety
+
+                // Append the emoji to the container
+                container.appendChild(emoji);
+
+                // Remove the emoji after the animation is complete (to avoid memory leak)
+                setTimeout(() => {
+                    emoji.remove();
+                }, randomDuration * 1000);
+            }
+        };
+
+        // Run the emoji rain on page load
+        // window.onload = createEmojiRain;
+        document.addEventListener('DOMContentLoaded', function (){
+            var successMessage = document.getElementById('success-message')
+            var errorMessage = document.getElementById('error-message')
+
+            if (successMessage){
+                createEmojiRain();
+
+            }
+            
+        });
+
+        document.getElementById("select-time").classList.add("active");
+        document.getElementById("personal-detail").classList.add("active");
+        document.getElementById("confirm-step").classList.add("active");
+        function addToCalendar() {
+            const event = {
+                title: "Appointment with {{ professional.full_name }}",
+                start: "{{ date }}T{{ time }}",
+                description: "Service: {{ service.title }}",
+            };
+
+            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start}/${event.start}&details=${encodeURIComponent(event.description)}`;
+
+            window.open(calendarUrl, '_blank');
+        }
+    </script>
+{% endblock %}

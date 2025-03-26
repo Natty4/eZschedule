@@ -1,0 +1,211 @@
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+    .modal-content h3{
+        margin-top: 15px;
+
+    }
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .rating-stars {
+        display: flex;
+
+        justify-content: flex-start;
+        gap: 5px;
+    }
+
+    .rating-stars .rating-star {
+        font-size: 3em;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    .rating-stars .rating-star:hover {
+        color: gold;
+    }
+    .comment {
+        margin-top: 10px;
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .submit-rating{
+        margin-top: 10px;
+        font-size: 30px;
+        font-weight: bold;
+        padding: 5px 10px;
+    }
+    #rating-success, #rating-error {
+        margin-top: 15px;
+        font-size: 16px;
+    }
+    #rating-success {
+        color: green;
+    }
+    #rating-error {
+        color: red;
+    }
+</style>
+
+
+    <div class="error message" id="rating-error-message" style="display:none;">
+        <p>There was an error submiting your feedback. Please try again.</p>
+
+    </div>
+    <div class="success message" id="rating-success-message" style="display:none;">
+        <p>successfull!</p>
+        <p>Thank your for your feedback </p>
+
+    </div>
+<div id="rating-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="close-modal">&times;</span>
+        <h3>Leave a rating</h3>
+        <div class="rating-stars">
+            <span class="rating-star" data-value="1">&starf;</span>
+            <span class="rating-star" data-value="2">&starf;</span>
+            <span class="rating-star" data-value="3">&starf;</span>
+            <span class="rating-star" data-value="4">&starf;</span>
+            <span class="rating-star" data-value="5">&starf;</span>
+        </div>
+        <textarea class="comment" id="comment" placeholder="Leave your feedback here..." rows="4" cols="50"></textarea>
+        <button id="submit-rating" class="btn btn-primary submit-rating">👆</button>
+
+    </div>
+</div>
+
+<script>
+    
+
+        
+        const modal = document.getElementById('rating-modal');
+        const closeModal = document.getElementById('close-modal');
+        const submitButton = document.getElementById('submit-rating');
+        const commentField = document.getElementById('comment');
+        const ratingContainer = document.querySelector('.rating-stars');
+        let ratingValue = null;
+
+        function openModal(business_id, service_id, staff_id, rating_type) {
+            window.business_id = business_id;
+            window.service_id = service_id;
+            window.staff_id = staff_id;
+            window.rating_type = rating_type;
+            modal.style.display = "block";
+        }
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = "none";
+        });
+
+
+        window.onclick = function(event) {
+            if (event.target == modal ) {
+                modal.style.display = "none";
+            }
+        }
+        function getCSRFToken() {
+            const csrfToken = document.cookie.match(/csrftoken=([^;]+)/);
+            return csrfToken ? csrfToken[1] : '';
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const stars = document.querySelectorAll('.rating-star');
+            stars.forEach(star => {
+                star.addEventListener('mouseover', () => {
+                    const value = star.getAttribute('data-value');
+                    stars.forEach(star => {
+                        star.style.color = (star.getAttribute('data-value') <= value) ? 'gold' : '#ddd';
+                    });
+                });
+                star.addEventListener('mouseout', () => {
+                    if (ratingValue === null) {
+                        stars.forEach(star => star.style.color = '#ddd');
+                    } else {
+                        stars.forEach(star => {
+                            star.style.color = (star.getAttribute('data-value') <= ratingValue) ? 'gold' : '#ddd';
+                        });
+
+                    }
+                });
+                star.addEventListener('click', () => {
+                    ratingValue = star.getAttribute('data-value');
+                    stars.forEach(star => {
+                        star.style.color = (star.getAttribute('data-value') <= ratingValue) ? 'gold' : '#ddd';
+                    });
+                });
+            });
+        });
+
+
+        submitButton.addEventListener('click', () => {
+            if (ratingValue === null) {
+                alert("Please select a rating. ");
+                return;
+            }
+
+            const reviewData = {
+                rating: ratingValue,
+                comment: commentField.value,
+                business: business_id,
+                service: service_id,
+                staff: staff_id ? staff_id : '',
+                rating_type: rating_type
+            };
+            const csrfToken = getCSRFToken();
+            fetch(`http://127.0.0.1:8000/go/api/rating/${business_id}/`,{
+                method: "POST",
+                headers: {
+                    "Content-type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify(reviewData),
+            })
+            .then(response => {
+
+                if (response.ok) {
+                    document.getElementById('rating-success-message').style.display = 'block';
+                    document.getElementById('rating-error-message').style.display = 'none';
+                    modal.style.display = "none";
+                    
+                } else {
+                    throw new Error('Error submiting feedback');
+                }
+            })
+            .catch((    ) => {
+                document.getElementById('rating-success-message').style.display = 'none';
+                document.getElementById('rating-error-message').style.display = 'block';
+            });
+        });
+
+</script>

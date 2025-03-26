@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Booking Summary
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #28A745;
+        }
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card h2 {
+            font-size: 1.5rem;
+            color: #28A745;
+            margin-bottom: 15px;
+        }
+        .card h3 {
+            color: #1e3348;
+            margin-bottom: 15px;
+        }
+        .card p {
+            color: #666;
+            font-size: 10px;
+        }
+        .card p strong {
+            color: #333;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        input[type="text"], input[type="radio"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            margin-top: 5px;
+        }
+        input[type="radio"] {
+            width: auto;
+        }
+        .btn-submit {
+            display: inline-block;
+            background-color: #28A745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-submit:hover {
+            background-color: #1e3348;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            background-color: #f8d7da;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px 10px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+        }
+        /* Responsive design */
+        @media (min-width: 768px) {
+            .cards-wrapper {
+                display: flex;
+                gap: 20px;
+            }
+            .card {
+                flex: 1;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <section class="booking-process">
+        <div class="container">
+            <div class="booking-steps">
+                <div class="step active" id="select-staff">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Select Professional</div>
+                </div>
+                <div class="step " id="select-time">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Choose Time</div>
+                </div>
+                <div class="step " id="personal-detail">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Your Details</div>
+                </div>
+                <div class="step " id="confirm-step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Confirmation</div>
+                </div>
+            </div>
+        {% if error_message %}
+        <div class="error message">
+            <p>{{ error_message }}</p>
+        </div>
+        {% endif %}
+        <div class="cards-wrapper">
+
+            <!-- Card 1: Personal Details -->
+            <div class="card">
+                <h4>Your Details</h4>
+                <p>NAME</p>
+                <p><strong>{{ user_data.user_detail.full_name }}</strong></p>
+                <p>EMAIL</p>
+                <p><strong>{{ user_data.user_detail.email }}</strong></p>
+                <p>PHONE</p>
+                <p><strong>{{ user_data.user_detail.phone_number }}</strong></p>
+                <p>PASSPORT/ID</p>
+                <p><strong>{% if user_data.user_detail.id_number %}{{ user_data.user_detail.id_number }}{% else %}--{% endif %}</strong></p>
+                <p>GENDER</p>
+                <p><strong>{% if user_data.user_detail.gender %}{{ user_data.user_detail.gender }}{% else %}--{% endif %}</strong></p>
+                <p>NOTES</p>
+                <p><strong>{% if user_data.notes %}{{ user_data.notes }}{% else %}--{% endif %}</strong></p>
+            </div>
+
+            <!-- Card 2: Booking Summary -->
+            <div class="card">
+                <h4>Booking Summary</h4>
+                <p>STAFF</p>
+                <p><strong>{{ staff.full_name }}</strong></p>
+                <p>SERVICE</p>
+                <p><strong>{{ service.title }}</strong></p>
+                <p>APPOINTMENT</p>
+                <p><strong>{{ date }} </strong> at <strong id="app-time">  </strong></p>
+                <p><strong>Service Price: {{ service.price }} ETB</strong></p>
+                <br>
+                <p><strong>Booking Fee: 100 ETB</strong></p>
+                <p><strong>Tax (0%): {% widthratio 100 0 1 %} ETB</strong></p>
+                <hr>
+                <p><strong>Total Fee: {% widthratio 100 1 1 %} ETB</strong></p>
+            </div>
+
+            <!-- Card 3: Payment Options -->
+            <div class="card">
+                <h4>Payment</h4>
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="payment_method" value="pay_on_arrival" required
+                                   onchange="document.getElementById('card-details').style.display = 'none';">
+                            Pay on Arrival
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="payment_method" value="card_payment" required
+                                   onchange="document.getElementById('card-details').style.display = this.checked ? 'block' : 'none';">
+                            Card Payment
+                        </label>
+                    </div>
+
+                    <div id="card-details" style="display:none;">
+                        <h3>Card Details</h3>
+                        <div class="form-group">
+                            <label for="card_number">Card Number</label>
+                            <input type="text" id="card_number" name="card_number" placeholder="1234 5678 9012 3456">
+                        </div>
+                        <div class="form-group">
+                            <label for="expiry_date">Expiry Date</label>
+                            <input type="text" id="expiry_date" name="expiry_date" placeholder="MM/YY">
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" name="cvv" placeholder="123">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Proceed</button>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+    
+        document.getElementById("select-time").classList.add("active");
+        document.getElementById("personal-detail").classList.add("active");
+
+        var start_time = "{{time}}";
+
+
+        const formattedStartTime = formatTime(start_time);
+        document.getElementById('app-time').textContent = ' ' + formattedStartTime + ' 🕛 ';
+        // Function to format the start time in AM/PM format
+        function formatTime(startTimeString) {
+
+            const [hour, minute] = startTimeString.split('-').slice(0)[0].split(':');
+            const date = new Date(`2025-01-01T${hour.trim()}:${minute.trim()}:00`);
+            // Get the formatted time and remove leading zero from hour if it exists
+            let formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            // Remove leading zero from the hour if necessary
+            formattedTime = formattedTime.replace(/^0/, '');  // Regex to remove leading zero
+        
+            return formattedTime;
+        }
+
+        
+    
+    
+    </script>
+{% endblock %}
+
+{% block footer%}
+{% endblock %}
