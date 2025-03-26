@@ -21,7 +21,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 #API_BASE_URL = settings.API_BASE_URL
-API_BASE_URL = 'http://127.0.0.1:8000/go/api/'
+API_BASE_URL = 'https://ezgo-ekrp.onrender.com/go/api/'
 
 
 

@@ -183,7 +183,7 @@
                 rating_type: rating_type
             };
             const csrfToken = getCSRFToken();
-            fetch(`http://127.0.0.1:8000/go/api/rating/${business_id}/`,{
+            fetch(`https://ezgo-ekrp.onrender.com/go/api/rating/${business_id}/`,{
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",
