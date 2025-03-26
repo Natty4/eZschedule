@@ -67,6 +67,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "goapp.urls"
 
+SITE_ID = 1
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -108,11 +110,7 @@ WSGI_APPLICATION = "goapp.wsgi.application"
 #     }
 # }
 
-import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-}
 
 if DEBUG:
     DATABASES = {
@@ -126,7 +124,12 @@ if DEBUG:
         }
     }
     
-
+else:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    }
+    
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_PORT = os.getenv('EMAIL_PORT')
