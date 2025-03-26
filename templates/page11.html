@@ -255,7 +255,7 @@
             resetMap();
         }
         
-        function initMap() {
+        /* function initMap() {
            //  map = L.map('map').setView([0, 0], 2);
             map = L.map('map', {
                 center: [0, 0],  // Starting position
@@ -269,6 +269,25 @@
                 subdomains:['mt0','mt1','mt2','mt3']
             }).addTo(map);
         
+            map.on('click', function(e) {
+                locationCoords = e.latlng;
+                updateUserMarker(e.latlng);
+                updateSearchCircle(locationCoords);
+            });
+        } */
+
+        function initMap() {
+            map = L.map('map', {
+                center: [0, 0],  // Starting position
+                zoom: 2,  // Starting zoom level
+                minZoom: 2  // Minimum zoom level (prevents zooming out beyond this level)
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '',
+                maxZoom: 20
+            }).addTo(map);
+
             map.on('click', function(e) {
                 locationCoords = e.latlng;
                 updateUserMarker(e.latlng);
