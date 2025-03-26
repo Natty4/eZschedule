@@ -6,6 +6,7 @@ chardet==5.2.0
 charset-normalizer==3.4.1
 colorama==0.4.6
 colorlog==6.9.0
+dj-database-url==2.3.0
 Django==4.2
 django-cors-headers==4.7.0
 django-environ==0.12.0
