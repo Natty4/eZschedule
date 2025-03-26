@@ -91,13 +91,13 @@
 {% endblock %}
 
 {% block content %}
-    <section class="business-header"  style="background:{% if business.image %} url({{business.image}}); {% else %} {{business.theme_color}}; {% endif %} background-size: cover;">
+    <section class="business-header"  style="background:{% if business.image.url %} url({{business.image.url}}); {% else %} {{business.theme_color}}; {% endif %} background-size: cover;">
         <div class="container">
            
             {% if business %}
                 <div class="business-header-content">
                     <div class="business-logo">
-                        <img src="{{business.logo|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo">                        
+                        <img src="{{business.logo.url|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo">                        
                         
                     </div>
                     <div class="business-header-info">
@@ -289,7 +289,7 @@
                             {% for employee in staff %}
                                 <div class="team-member-card">
                                     
-                                    <img src="{% if employee.photo %}{{ employee.photo }}{% else %}{{ 'img/avatar.png' }}{% endif %}" alt="{{ employee.full_name }}">
+                                    <img src="{{ employee.photo.url|default:"/static/img/avatar.png"}}" alt="{{ employee.full_name }}">
 
                                     <h3>{{ employee.full_name }}</h3>
                                     <p>{{ employee.role|default:"Staff" }}</p>

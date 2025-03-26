@@ -92,18 +92,13 @@
 <div class="emoji-rain" id="emojiRain">
 
 </div>
-<section class="business-header"  style="background:{% if business_data.business.image %} url({{business_data.business.image}}); {% else %} {{business_data.business.theme_color}}; {% endif %} background-size: cover;">
+<section class="business-header"  style="background:{% if business_data.business.image %} url({{business_data.business.image.url}}); {% else %} {{business_data.business.theme_color}}; {% endif %} background-size: cover;">
     <div class="container">
         {% if business_data %}
             <div class="business-header-content">
                 <div class="business-logo">
-                    {% if business_data.business.logo %}
-                        <img src="{{ business_data.business.logo }}" 
-                        alt="{{ business_data.business.name }} logo" class="business-logo">
-                    {% else %}
-                        <img src="{% static 'img/default-business-logo.jpg' %}"
-                        alt="{{ business.name }} logo" class="business-logo">
-                    {% endif %}
+                    <img src="{{business_data.business.logo.url|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business_data.business.name }} logo" class="business-logo">
+    
                     
                 </div>
                 <div class="business-header-info">

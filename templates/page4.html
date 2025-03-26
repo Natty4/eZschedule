@@ -207,7 +207,7 @@
             <div class="professional-card">
                 <div class="profile">
                     <div class="image">
-                        <img src="{{staff.photo|default:"/static/img/avatar.png"}}" alt="{{ staff.full_name }}">
+                        <img src="{{staff.photo.url|default:"/static/img/avatar.png"}}" alt="{{ staff.full_name }}">
                     </div>
                     <div class="details">
                         <p class="profile-role">{{ staff.role }}</p>
