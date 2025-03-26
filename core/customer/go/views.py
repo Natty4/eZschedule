@@ -20,9 +20,6 @@ from django.conf import settings
 # Set up logging
 logger = logging.getLogger(__name__)
 
-#API_BASE_URL = settings.API_BASE_URL
-API_BASE_URL = 'https://ezgo-ekrp.onrender.com/go/api/'
-
 
 
 import hashlib
@@ -30,6 +27,17 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+
+
+#API_BASE_URL = settings.API_BASE_URL
+API_BASE_URL = 'https://ezgo-ekrp.onrender.com/go/api/'
+
+if settings.DEBUG:
+    API_BASE_URL = 'http://localhost:8000/go/api/'
+
+
+
+
 
 @csrf_exempt
 def telegram_login(request):
