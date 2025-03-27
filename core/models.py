@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from cloudinary.models import CloudinaryField 
-from cloudinary import CloudinaryImage
 from django.utils.translation import gettext_lazy as _
 
 
