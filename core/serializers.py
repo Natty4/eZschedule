@@ -49,18 +49,27 @@ class CategorySerializer(serializers.ModelSerializer):
 
 # Business Serializer (Linked to Category)
 class BusinessSerializer(serializers.ModelSerializer):
-    image_url = CloudinaryURLField(source='image')
-    logo_url = CloudinaryURLField(source='logo')
-    # category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())  # Allows category assignment
+    image_url = serializers.SerializerMethodField()
+    logo_url = serializers.SerializerMethodField()
+    
     category = CategorySerializer(read_only=True)
-    services = serializers.PrimaryKeyRelatedField(queryset=Service.objects.all(), many=True)  # Supports multiple services
+    services = serializers.PrimaryKeyRelatedField(queryset=Service.objects.all(), many=True)
 
     class Meta:
         model = Business
-        fields = ['id', 'name', 'description', 'image_url', 'logo_url', 'category',
-                  'address', 'phone_number', 'email', 'website', 'services', 
-                  'is_active', 'is_verified', 'created_at', 'updated_at', 'image', 'logo'
-                  ]
+        fields = ['id', 'name', 'description', 'image_url', 'logo_url', 'category', 'address', 
+                  'phone_number', 'email', 'website', 'services', 'is_active', 'is_verified', 
+                  'created_at', 'updated_at']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
+
+    def get_logo_url(self, obj):
+        if obj.logo:
+            return obj.logo.url
+        return None
 
 
 # Employee Serializer (Linked to Business and User)
