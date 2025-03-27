@@ -196,7 +196,7 @@
             <div id="business-list" class="business-list">
                 {% for business in businesses %}
              
-                <div class="business-card" onclick="viewServices('{{ business.id }}')" style="background: url({{ business.image.url }}); background-size: cover;">
+                <div class="business-card" onclick="viewServices('{{ business.id }}')" style="background: url({{ business.image }}); background-size: cover;">
                     <img src="{{business.logo|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo">
 
                     
