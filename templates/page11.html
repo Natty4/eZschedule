@@ -195,8 +195,7 @@
         <div class="container">
             <div id="business-list" class="business-list">
                 {% for business in businesses %}
-                {{ business.image.url }} --- {{ business.logo.url }} ==
-                {{business.image}} -|- {{business.logo}} -|-
+             
                 <div class="business-card" onclick="viewServices('{{ business.id }}')" style="background: url({{ business.image.url }}); background-size: cover;">
                     <img src="{{business.logo.url|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo"> 
                     
@@ -434,7 +433,7 @@
                 let businessCard = document.createElement("div");
                 businessCard.classList.add("business-card");
                 businessCard.innerHTML = `
-                    <img src="${business.logo.url || '/static/img/default-business-logo.jpg'}"
+                    <img src="${business.logo || '/static/img/default-business-logo.jpg'}"
                         alt="${business.name} logo" class="business-logo">
                     <div class="business-details" style="background:${business.theme_color};">
                         <h2>${business.name}</h2>
@@ -459,7 +458,7 @@
                 const marker = L.marker([business.latitude, business.longitude]).addTo(map)
                     .bindPopup(`
                         <b>${business.name}</b><br>
-                        <img src="${business.logo.url || '/static/img/default-business-logo.jpg'}" alt="${business.name} logo" style="width:50px;height:50px;margin-top:10px;"><br>
+                        <img src="${business.logo || '/static/img/default-business-logo.jpg'}" alt="${business.name} logo" style="width:50px;height:50px;margin-top:10px;"><br>
                         ${business.category.name}<br>
                         ${business.distance} km away<br>
                         <a href="/businesses/${business.id}/services/">View Details</a>
@@ -510,7 +509,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Your other code here
+           
         
             // Add event listener for the business-count element
             const businessCountElement = document.getElementById('business-count');
