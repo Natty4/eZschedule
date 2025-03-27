@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.sites', 
     'drf_yasg',
     'cloudinary',
-    'cloudinary_storage,
+    'cloudinary_storage',
 ]
 
 
