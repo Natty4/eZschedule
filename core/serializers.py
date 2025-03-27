@@ -3,8 +3,19 @@ from .models import (
     User, Customer, Category, Business, Employee, Service,
     ReservedSlot, Appointment, Payment, Subscription, Notification, Rating, BusinessHour
 )
-from .fields import CloudinaryURLField
+from cloudinary.models import CloudinaryField
 
+
+class CloudinaryURLField(serializers.Field):
+    def to_representation(self, value):
+        """
+        Return the Cloudinary URL for a CloudinaryField.
+        """
+        if isinstance(value, CloudinaryField):
+            return value.url if value else None  # Correct the attribute name here (use `url`)
+        return None
+    
+    
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
