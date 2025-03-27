@@ -12,6 +12,8 @@ class CloudinaryURLField(serializers.Field):
         Return the Cloudinary URL for a CloudinaryField.
         """
         if isinstance(value, CloudinaryField):
+            print(f"Value---------: {value}")
+            print(f"Value URL-------------: {value.url}")
             return value.url if value else None  # Correct the attribute name here (use `url`)
         return None
     
