@@ -197,7 +197,9 @@
                 {% for business in businesses %}
              
                 <div class="business-card" onclick="viewServices('{{ business.id }}')" style="background: url({{ business.image.url }}); background-size: cover;">
-                    <img src="{{business.logo|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo"> 
+                    <img src="{{business.logo|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo">
+
+<img src="{{business.logo.url|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business.name }} logo" class="business-logo"> 
                     
                     <div class="business-details" style="background:{{business.theme_color}};">
                         <h2>{{ business.name }}</h2>
