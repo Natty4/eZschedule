@@ -46,7 +46,7 @@ class BusinessSerializer(serializers.ModelSerializer):
         model = Business
         fields = ['id', 'name', 'description', 'image_url', 'logo_url', 'category',
                   'address', 'phone_number', 'email', 'website', 'services', 
-                  'is_active', 'is_verified', 'created_at', 'updated_at'
+                  'is_active', 'is_verified', 'created_at', 'updated_at', 'image', 'logo'
                   ]
 
 
