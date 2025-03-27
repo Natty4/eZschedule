@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'django.contrib.sites', 
     'drf_yasg',
+    'cloudinary',
+    'cloudinary_storage,
 ]
 
 
