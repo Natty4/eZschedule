@@ -3,19 +3,6 @@ from .models import (
     User, Customer, Category, Business, Employee, Service,
     ReservedSlot, Appointment, Payment, Subscription, Notification, Rating, BusinessHour
 )
-from cloudinary.models import CloudinaryField
-
-
-class CloudinaryURLField(serializers.Field):
-    def to_representation(self, value):
-        """
-        Return the Cloudinary URL for a CloudinaryField.
-        """
-        if isinstance(value, CloudinaryField):
-            print(f"Value---------: {value}")
-            print(f"Value URL-------------: {value.url}")
-            return value.url if value else None  # Correct the attribute name here (use `url`)
-        return None
     
     
 # User Serializer
@@ -39,13 +26,16 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 # Category Serializer
 class CategorySerializer(serializers.ModelSerializer):
-    image_url = CloudinaryURLField(source='image')  # Use CloudinaryURLField for image field
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = Category
         fields = ['id', 'name', 'image_url', 'description']  # Include all fields
         read_only_fields = ['id']  # Make id read-only
         
-
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 # Business Serializer (Linked to Category)
 class BusinessSerializer(serializers.ModelSerializer):
@@ -59,7 +49,7 @@ class BusinessSerializer(serializers.ModelSerializer):
         model = Business
         fields = ['id', 'name', 'description', 'image_url', 'logo_url', 'category', 'address', 
                   'phone_number', 'email', 'website', 'services', 'is_active', 'is_verified', 'theme_color',
-                  'created_at', 'updated_at']
+                  'latitude', 'longitude', 'created_at', 'updated_at']
 
     def get_image_url(self, obj):
         if obj.image:
@@ -80,7 +70,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = ['id', 'full_name', 'user', 'business', 'photo_url', 'role']
+        fields = ['id', 'full_name', 'user', 'business', 'photo_url', 'role', 'is_active']
 
     def get_photo_url(self, obj):
         if obj.photo:
@@ -98,8 +88,8 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'title', 'description', 'image_url', 'business',
-                  'employee', 'duration', 'price', 'is_active', 'is_featured', 
-                  'created_at', 'updated_at'
+                  'employee', 'duration', 'price', 'preliminary_questions',  
+                  'is_active', 'is_featured', 'created_at', 'updated_at'
                   ]
     def get_image_url(self, obj):
         if obj.image:
@@ -139,9 +129,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appointment
-        fields = ['id', 'customer', 'service', 'employee', 'slot',
-                  'status', 'is_active', 'qr_code_url', 'created_at', 
-                  'updated_at'
+        fields = ['id', 'customer', 'business', 'service', 'employee', 'slot',
+                  'preliminary_answers', 'notes', 'status', 'is_active', 'qr_code_url', 
+                  'created_at', 'updated_at'
                   ]
 
     def get_qr_code_url(self, obj):
