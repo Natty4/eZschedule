@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 import logging
 import colorlog
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 load_dotenv()
 
@@ -231,9 +234,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 # Cloudinary configuration
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 
 cloudinary.config(
     cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'), 
