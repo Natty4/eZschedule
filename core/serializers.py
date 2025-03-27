@@ -58,7 +58,7 @@ class BusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
         fields = ['id', 'name', 'description', 'image_url', 'logo_url', 'category', 'address', 
-                  'phone_number', 'email', 'website', 'services', 'is_active', 'is_verified', 
+                  'phone_number', 'email', 'website', 'services', 'is_active', 'is_verified', 'theme_color',
                   'created_at', 'updated_at']
 
     def get_image_url(self, obj):
@@ -74,7 +74,7 @@ class BusinessSerializer(serializers.ModelSerializer):
 
 # Employee Serializer (Linked to Business and User)
 class EmployeeSerializer(serializers.ModelSerializer):
-    photo_url = CloudinaryURLField(source='photo')
+    photo_url = serializers.SerializerMethodField()
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())  
     business = serializers.PrimaryKeyRelatedField(queryset=Business.objects.all())
 
@@ -82,10 +82,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ['id', 'full_name', 'user', 'business', 'photo_url', 'role']
 
+    def get_photo_url(self, obj):
+        if obj.photo:
+            return obj.photo.url
+        return None
 
 # Service Serializer (Linked to Business and Employees)
 class ServiceSerializer(serializers.ModelSerializer):
-    image_url = CloudinaryURLField(source='image')
+    image_url = serializers.SerializerMethodField()
     business = serializers.PrimaryKeyRelatedField(queryset=Business.objects.all())  
     # employee = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), many=True)  # Supports multiple employees
     employee = EmployeeSerializer(read_only=True, many=True)  # Supports multiple employees
@@ -94,10 +98,15 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'title', 'description', 'image_url', 'business',
-                  'employee', 'duration', 'price', 'is_active', 'is_featured',
+                  'employee', 'duration', 'price', 'is_active', 'is_featured', 
                   'created_at', 'updated_at'
                   ]
-
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
+    
+    
 # BusinessHour Serializer (Linked to Business)
 class BusinessHourSerializer(serializers.ModelSerializer):
     # business = serializers.PrimaryKeyRelatedField(queryset=Business.objects.all())  
@@ -121,7 +130,7 @@ class ReservedSlotSerializer(serializers.ModelSerializer):
 
 # Appointment Serializer (Linked to Customer, Service, Employee, and Slot)
 class AppointmentSerializer(serializers.ModelSerializer):
-    qr_code_url = CloudinaryURLField(source='qr_code')
+    qr_code_url = serializers.SerializerMethodField()
     customer = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())  
     service = serializers.PrimaryKeyRelatedField(queryset=Service.objects.all())  
     employee = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all())  
@@ -135,6 +144,11 @@ class AppointmentSerializer(serializers.ModelSerializer):
                   'updated_at'
                   ]
 
+    def get_qr_code_url(self, obj):
+        if obj.qr_code:
+            return obj.qr_code.url
+        return None
+    
 
 # Payment Serializer (Linked to Appointment)
 class PaymentSerializer(serializers.ModelSerializer):
