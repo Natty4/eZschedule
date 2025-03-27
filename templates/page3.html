@@ -112,7 +112,7 @@
                 <div class="professional-card" data-professional-id="{{ professional.id }}">
                     <div class="profile">
                         <div class="image">
-                            <img src="{{professional.photo|default:"/static/img/avatar.png"}}" alt="{{ professional.full_name }}">
+                            <img src="{{professional.photo_url|default:"/static/img/avatar.png"}}" alt="{{ professional.full_name }}">
                         </div>
                         <div class="details">
                             <p class="profile-role">{{ professional.role }}</p>
