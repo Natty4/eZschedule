@@ -37,7 +37,11 @@ urlpatterns = [
     path("business/api/", include("core.business.api.urls")),
     path("go/api/", include("core.customer.api.urls")),
     path("", include("core.customer.go.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] 
+
+
+if not settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
 # # Custom error views
