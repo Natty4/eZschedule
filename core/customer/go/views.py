@@ -143,8 +143,6 @@ def business_list_view(request):
             
                 
         for business in businesses:
-            print(business, business.image_url, '----------------------------')
-            logger.info(f"Business: {business['name']}, Image URL ---------------------------- : {business['image_url']}")
             business['num_services'] = len(business.get('services', []))
 
         return render(request, 'page11.html', {'businesses': businesses, 'categories': category_data, 'success_message':success_message, 'error_message': error_message })
