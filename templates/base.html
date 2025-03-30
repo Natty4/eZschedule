@@ -30,6 +30,12 @@
         --border-radius: 0.375rem;
         --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         --transition: all 0.3s ease;
+        
+        --bg-color: #ffffff;
+        --text-color: #000000;
+        --card-bg-color: #f0f0f0;
+        --card-hover-bg-color: #8eaffd;
+        --box-shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
 
         * {
@@ -2416,6 +2422,38 @@ document.addEventListener("DOMContentLoaded", () => {
   })
   
   
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.Telegram) {
+                // Telegram SDK is available, proceed with your logic
+                const tg = window.Telegram.WebApp;
+                tg.ready(); // Signal Telegram that your web app is ready
+                applyTheme();
+            } else {
+                console.error("Telegram Web SDK is not loaded properly.");
+            }
+            tg.onEvent('themeChanged', function() {
+                applyTheme();
+            });
+            function applyTheme() {
+                const theme = tg.themeParams || {};
+                // Ensure that the theme values are available
+                const bgColor = theme.bg_color || '#ffffff'; // Default to white if undefined
+                const textColor = theme.text_color || '#000000'; // Default to black if undefined
+                const cardBgColor = theme.secondary_bg_color || '#f0f0f0'; // Default light color
+                const cardHoverColor = theme.button_color || '#8eaffd'; // Default blue color
+                const shadowColor = theme.shadow_color || 'rgba(0, 0, 0, 0.1)'; // Default shadow
+        
+                // Apply theme colors using CSS variables
+                document.documentElement.style.setProperty('--bg-color', bgColor);
+                document.documentElement.style.setProperty('--text-color', textColor);
+                document.documentElement.style.setProperty('--card-bg-color', cardBgColor);
+                document.documentElement.style.setProperty('--card-hover-bg-color', cardHoverColor);
+                document.documentElement.style.setProperty('--box-shadow', `0 2px 5px ${shadowColor}`);
+                document.documentElement.style.setProperty('--box-shadow-hover', `0 4px 10px ${shadowColor}`);
+            }
+        });
     </script>
     <!-- Telegram Login Widget -->
     {% comment %} <script async src="https://telegram.org/js/telegram-widget.js?7"
