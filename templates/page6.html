@@ -201,9 +201,15 @@
                     <p>Present this QR code at the entrance.</p>
                     
                     <div class="">
+                        {% comment %} <button class="btn btn-primary" onclick="window.location.href='{% url 'thank_you' appointment.id %}?download=true'">
+                            <i class="fas fa-download"></i>
+                            Get Invoice
+                        </button> {% endcomment %}
+                        {% comment %} onclic print page  {% endcomment %}
+
                         <button class="btn btn-primary" onclick="window.print()">
                             <i class="fas fa-download"></i>
-                            Get Invoice 
+                            Get Invoice
                         </button>
                         <p>View and save the full receipt for your reference.</p>
                     </div>
@@ -275,15 +281,24 @@
         document.getElementById("select-time").classList.add("active");
         document.getElementById("personal-detail").classList.add("active");
         document.getElementById("confirm-step").classList.add("active");
+        
         function addToCalendar() {
-            const event = {
-                title: "Appointment with {{ professional.full_name }}",
-                start: "{{ date }}T{{ time }}",
-                description: "Service: {{ service.title }}",
-            };
-
-            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start}/${event.start}&details=${encodeURIComponent(event.description)}`;
-
+            // Get the relevant information from your context (template variables)
+            const appointmentTitle = "Appointment with " + "{{ staff.full_name }}"; // Staff name
+            const serviceTitle = "{{ service.title }}"; // Service name
+            const customerName = "{{ customer.full_name }}"; // Customer name
+            const appointmentDate = "{{ date }}"; // Appointment date
+            const appointmentStartTime = "{{ slot.start_time }}"; // Appointment start time
+            const appointmentEndTime = "{{ slot.end_time }}"; // Appointment end time
+            const appointmentTime = "{{ slot }}"; // Appointment time
+            const description = `Service: ${serviceTitle}\nCustomer: ${customerName}`;
+        
+            // Format the start and end time (ISO 8601 format)
+            const startDateTime = `${appointmentDate}T${appointmentTime}`;
+            const endDateTime = `${appointmentDate}T${parseInt(appointmentStartTime.split(':')[0]) + 1}:${appointmentEndTime.split(':')[1]}`;
+        
+            // Google Calendar URL with the details
+            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(appointmentTitle)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}`;
             window.open(calendarUrl, '_blank');
         }
     </script>

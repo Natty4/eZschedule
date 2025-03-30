@@ -366,6 +366,7 @@ class InvoiceAPIView(APIView):
             # Retrieve appointment and payment
             appointment = get_object_or_404(Appointment, id=appointment_id)
             payment = get_object_or_404(Payment, appointment=appointment.id)
+            slot = get_object_or_404(ReservedSlot, id=appointment.slot.id)
             customer_id = appointment.customer.id
             customer = get_object_or_404(Customer, id=customer_id)
             
@@ -377,7 +378,7 @@ class InvoiceAPIView(APIView):
                 border=4,
             )
             Token = f"{appointment.id}-369-{appointment.service.id}"
-            Date = f"{appointment.slot.start_time}"
+            Date = f"{slot.start_time}"
             Service = f"{appointment.service.title}"
             FullName = f"{appointment.customer.full_name}"
             qr_data = f"Full Name: {FullName}\nService: {Service}\nDate: {Date}\n\nToken: {Token}"
@@ -419,11 +420,17 @@ class InvoiceAPIView(APIView):
                 "updated_at": data["updated_at"],
                 "Token": Token
             }
-            
+            appointment_data = appointment_serializer.data
+            appointment_data["slot"] = {
+                "start_time": slot.start_time.strftime("%Y-%m-%d-%H:%M"),
+                "end_time": slot.end_time.strftime("%Y-%m-%d-%H:%M"),
+                "date": slot.start_time.strftime("%Y-%m-%d"),
+                "day": slot.start_time.strftime("%A"),
+            }
             # Include QR code URL in the response
             return Response({
                 "customer": customer_data,
-                "appointment": appointment_serializer.data,
+                "appointment": appointment_data,
                 "payment": payment_serializer.data,
                 "qr_code_url": qr_code_url  # Cloudinary URL for the QR code
             })

@@ -393,27 +393,27 @@ def booking_summary_view(request, business_id, service_id, staff_id, date, time)
 # this view can only be accessed after a successful booking
 
 def thank_you_view(request, appointment_id):
-    # if not request.session.get('booking_successful'):
-    #     return redirect('business_list')
+    if not request.session.get('booking_successful'):
+        return redirect('business_list')
     response = requests.get(f'{API_BASE_URL}invoice/{appointment_id}/')
-    
     if response.status_code == 200:
         invoice_data = response.json()
         service = request.session.get('current_service')
-        staff = invoice_data['appointment']['employee']
+        staff_id = invoice_data['appointment']['employee']
+        staff = [st for st in service['employee'] if st['id'] == str(staff_id)][0]
         slot = invoice_data['appointment']['slot']
         appointment = invoice_data['appointment']
         customer = invoice_data['customer']
         payment = invoice_data['payment']
         qr_code_url = invoice_data['qr_code_url']
         business = request.session.get('business_data', [])
-        date = slot
+        date = slot['date']
         time = slot
-        
         buffer = BytesIO()
         p = canvas.Canvas(buffer)
         p.drawString(100, 800, f"Invoice for Appointment #{appointment_id}")
         p.drawString(100, 780, f"Service: {service['title']}")
+        p.drawString(100, 760, f"Staff: {staff['full_name']}")
         p.drawString(100, 760, f"Date: {slot}")
         p.drawString(100, 740, f"Customer: {customer['full_name']}")
         p.drawString(100, 720, f"Payment Status: {payment['status']}")
@@ -429,15 +429,15 @@ def thank_you_view(request, appointment_id):
         # buffer.seek(0)
         # return HttpResponse(buffer, content_type="application/pdf")
         
-        # del request.session['booking_successful']
- 
+        del request.session['booking_successful']
+        
         return render(request, 'page6.html', {
             'appointment': appointment,
             'customer': customer,
             'service': service,
             'staff': staff,
             'date': date,
-            'time': time,
+            'slot': slot,
             'payment': payment,
             'qr': qr_code_url,
             'business_data': business,
