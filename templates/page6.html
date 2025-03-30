@@ -94,12 +94,11 @@
 </div>
 <section class="business-header"  style="background:{% if business_data.business.image_url %} url({{business_data.business.image_url}}); {% else %} {{business_data.business.theme_color}}; {% endif %} background-size: cover;">
     <div class="container">
+        
         {% if business_data %}
             <div class="business-header-content">
                 <div class="business-logo">
                     <img src="{{business_data.business.logo_url|default:"/static/img/default-business-logo.jpg"}}" alt="{{ business_data.business.name }} logo" class="business-logo">
-    
-                    
                 </div>
                 <div class="business-header-info">
                     <h1>{{business_data.business.name}}</h1>

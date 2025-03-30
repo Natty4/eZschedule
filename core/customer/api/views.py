@@ -18,6 +18,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes    
 from django.http import JsonResponse
 from geopy.distance import geodesic
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
 
 class FindNearbyBusiness(APIView):
     permission_classes = [permissions.AllowAny]
@@ -357,11 +359,11 @@ class BookingConfirmationAPIView(APIView):
             return Response({str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 
+
 class InvoiceAPIView(APIView):
     def get(self, request, appointment_id):
         try:
-            # appointment_id = appointment_id
-            
+            # Retrieve appointment and payment
             appointment = get_object_or_404(Appointment, id=appointment_id)
             payment = get_object_or_404(Payment, appointment=appointment.id)
             customer_id = appointment.customer.id
@@ -383,11 +385,24 @@ class InvoiceAPIView(APIView):
             qr.make(fit=True)
 
             img = qr.make_image(fill_color="black", back_color="white")
+            
+            # Create buffer to hold image
             buffer = BytesIO()
             img.save(buffer, format="PNG")
-            qr_code_file = File(buffer, name=f"qr_{str(appointment.id)[0:9]}-ez-{str(appointment.service.id)[9:]}.png")
-            # Save QR code to the appointment (optional)
-            appointment.qr_code.save(qr_code_file.name, qr_code_file, save=True)
+            
+            # Rewind the buffer to the beginning
+            buffer.seek(0)
+            
+            # Create a File object from the buffer
+            qr_code_file = File(buffer, name=f"qr_{str(appointment.id)}.png")
+
+            # Upload to Cloudinary
+            upload_response = upload(qr_code_file, folder='appointments_qr_codes')
+            qr_code_url = upload_response.get('secure_url')
+
+            # Save the Cloudinary URL to the appointment's qr_code field
+            appointment.qr_code = qr_code_url
+            appointment.save()
 
             # Serialize data
             appointment_serializer = AppointmentSerializer(appointment)
@@ -403,18 +418,16 @@ class InvoiceAPIView(APIView):
                 "user_type": data["user_type"],
                 "updated_at": data["updated_at"],
                 "Token": Token
-                
-                
             }
-            # Include QR code in the response
-            qr_code_url = request.build_absolute_uri(appointment.qr_code.url)
-
+            
+            # Include QR code URL in the response
             return Response({
                 "customer": customer_data,
                 "appointment": appointment_serializer.data,
                 "payment": payment_serializer.data,
-                "qr_code_url": qr_code_url
+                "qr_code_url": qr_code_url  # Cloudinary URL for the QR code
             })
+        
         except Appointment.DoesNotExist:
             return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
         except Payment.DoesNotExist:

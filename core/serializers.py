@@ -135,9 +135,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
                   ]
 
     def get_qr_code_url(self, obj):
-        if obj.qr_code:
-            return obj.qr_code.url
-        return None
+        # Directly return the value of qr_code which is a URL string
+        return obj.qr_code if obj.qr_code else None
     
 
 # Payment Serializer (Linked to Appointment)

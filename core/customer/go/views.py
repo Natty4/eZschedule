@@ -393,9 +393,10 @@ def booking_summary_view(request, business_id, service_id, staff_id, date, time)
 # this view can only be accessed after a successful booking
 
 def thank_you_view(request, appointment_id):
-    if not request.session.get('booking_successful'):
-        return redirect('business_list')
+    # if not request.session.get('booking_successful'):
+    #     return redirect('business_list')
     response = requests.get(f'{API_BASE_URL}invoice/{appointment_id}/')
+    
     if response.status_code == 200:
         invoice_data = response.json()
         service = request.session.get('current_service')
@@ -428,7 +429,8 @@ def thank_you_view(request, appointment_id):
         # buffer.seek(0)
         # return HttpResponse(buffer, content_type="application/pdf")
         
-        del request.session['booking_successful']
+        # del request.session['booking_successful']
+ 
         return render(request, 'page6.html', {
             'appointment': appointment,
             'customer': customer,
@@ -442,6 +444,7 @@ def thank_you_view(request, appointment_id):
             'success_message': "Success!"
         })
     else:
+        
         data = response.json()
         return render(request, 'page6.html', {'error_message': data['error']})
 
