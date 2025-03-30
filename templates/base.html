@@ -47,8 +47,8 @@
         body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         line-height: 1.6;
-        color: var(--dark-color);
-        background-color: #f5f5f7;
+        color: var(--text-color);
+        background-color: var(--bg-color);
         }
 
         a {
@@ -365,7 +365,7 @@
         }
 
         .category-card {
-        background-color: white;
+        background-color: var(--bg-color);
         border-radius: var(--border-radius);
         padding: 2rem;
         text-align: center;
@@ -813,7 +813,7 @@
         }
 
         .service-card {
-        background-color: white;
+        background-color: var(--card-bg-color);
         border-radius: var(--border-radius);
         overflow: hidden;
         box-shadow: var(--box-shadow);
@@ -884,7 +884,7 @@
         }
 
         .team-card {
-        background-color: white;
+        background-color: var(--card-bg-color);
         border-radius: var(--border-radius);
         overflow: hidden;
         box-shadow: var(--box-shadow);
@@ -2308,27 +2308,28 @@
                 tg.onEvent('themeChanged', function() {
                     applyTheme(); // Reapply the theme whenever it changes
                 });
+                alert("Telegram Web SDK is loaded successfully.");
+                function applyTheme() {
+                    const theme = tg.themeParams || {};
+                    // Ensure that the theme values are available
+                    const bgColor = theme.bg_color || '#ffffff'; // Default to white if undefined
+                    const textColor = theme.text_color || '#000000'; // Default to black if undefined
+                    const cardBgColor = theme.secondary_bg_color || '#f0f0f0'; // Default light color
+                    const cardHoverColor = theme.button_color || '#8eaffd'; // Default blue color
+                    const shadowColor = theme.shadow_color || 'rgba(0, 0, 0, 0.1)'; // Default shadow
+                    
+                    alert("Theme applied: " + JSON.stringify(theme));
+                    // Apply theme colors using CSS variables
+                    document.documentElement.style.setProperty('--bg-color', bgColor);
+                    document.documentElement.style.setProperty('--text-color', textColor);
+                    document.documentElement.style.setProperty('--card-bg-color', cardBgColor);
+                    document.documentElement.style.setProperty('--card-hover-bg-color', cardHoverColor);
+                    document.documentElement.style.setProperty('--box-shadow', `0 2px 5px ${shadowColor}`);
+                    document.documentElement.style.setProperty('--box-shadow-hover', `0 4px 10px ${shadowColor}`);
+                }
             } else {
+                alert("Telegram Web SDK is not loaded properly. Please check your integration.");
                 console.error("Telegram Web SDK is not loaded properly.");
-            }
-        
-            function applyTheme() {
-                const theme = tg.themeParams || {};
-                // Ensure that the theme values are available
-                const bgColor = theme.bg_color || '#ffffff'; // Default to white if undefined
-                const textColor = theme.text_color || '#000000'; // Default to black if undefined
-                const cardBgColor = theme.secondary_bg_color || '#f0f0f0'; // Default light color
-                const cardHoverColor = theme.button_color || '#8eaffd'; // Default blue color
-                const shadowColor = theme.shadow_color || 'rgba(0, 0, 0, 0.1)'; // Default shadow
-                
-                alert("Theme applied: " + JSON.stringify(theme));
-                // Apply theme colors using CSS variables
-                document.documentElement.style.setProperty('--bg-color', bgColor);
-                document.documentElement.style.setProperty('--text-color', textColor);
-                document.documentElement.style.setProperty('--card-bg-color', cardBgColor);
-                document.documentElement.style.setProperty('--card-hover-bg-color', cardHoverColor);
-                document.documentElement.style.setProperty('--box-shadow', `0 2px 5px ${shadowColor}`);
-                document.documentElement.style.setProperty('--box-shadow-hover', `0 4px 10px ${shadowColor}`);
             }
         });
         
