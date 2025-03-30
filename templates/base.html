@@ -2300,23 +2300,36 @@
             if (window.Telegram) {
                 // Telegram SDK is available, proceed with your logic
                 const tg = window.Telegram.WebApp;
+                
                 tg.ready(); // Signal Telegram that your web app is ready
-                applyTheme();
+                applyTheme(); // Apply the theme on initial load
+        
+                // Listen for theme changes (like switching between light/dark mode)
+                tg.onEvent('themeChanged', function() {
+                    applyTheme(); // Reapply the theme whenever it changes
+                });
             } else {
                 console.error("Telegram Web SDK is not loaded properly.");
             }
         
             function applyTheme() {
                 const theme = tg.themeParams || {};
-                document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#ffffff');
-                document.documentElement.style.setProperty('--text-color', theme.text_color || '#000000');
-                document.documentElement.style.setProperty('--card-bg-color', theme.secondary_bg_color || '#f0f0f0');
-                document.documentElement.style.setProperty('--card-hover-bg-color', theme.button_color || '#8eaffd');
-                document.documentElement.style.setProperty('--box-shadow', '0 2px 5px ' + (theme.shadow_color || 'rgba(0, 0, 0, 0.1)'));
-                document.documentElement.style.setProperty('--box-shadow-hover', '0 4px 10px ' + (theme.shadow_color || 'rgba(0, 0, 0, 0.2)'));
+                // Ensure that the theme values are available
+                const bgColor = theme.bg_color || '#ffffff'; // Default to white if undefined
+                const textColor = theme.text_color || '#000000'; // Default to black if undefined
+                const cardBgColor = theme.secondary_bg_color || '#f0f0f0'; // Default light color
+                const cardHoverColor = theme.button_color || '#8eaffd'; // Default blue color
+                const shadowColor = theme.shadow_color || 'rgba(0, 0, 0, 0.1)'; // Default shadow
+                
+                alert("Theme applied: " + JSON.stringify(theme));
+                // Apply theme colors using CSS variables
+                document.documentElement.style.setProperty('--bg-color', bgColor);
+                document.documentElement.style.setProperty('--text-color', textColor);
+                document.documentElement.style.setProperty('--card-bg-color', cardBgColor);
+                document.documentElement.style.setProperty('--card-hover-bg-color', cardHoverColor);
+                document.documentElement.style.setProperty('--box-shadow', `0 2px 5px ${shadowColor}`);
+                document.documentElement.style.setProperty('--box-shadow-hover', `0 4px 10px ${shadowColor}`);
             }
-        
-            
         });
         
     </script>
@@ -2423,43 +2436,7 @@
   
   
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            if (window.Telegram) {
-                // Telegram SDK is available, proceed with your logic
-                const tg = window.Telegram.WebApp;
-                
-                tg.ready(); // Signal Telegram that your web app is ready
-                applyTheme(); // Apply the theme on initial load
-        
-                // Listen for theme changes (like switching between light/dark mode)
-                tg.onEvent('themeChanged', function() {
-                    applyTheme(); // Reapply the theme whenever it changes
-                });
-            } else {
-                console.error("Telegram Web SDK is not loaded properly.");
-            }
-        
-            function applyTheme() {
-                const theme = tg.themeParams || {};
-                // Ensure that the theme values are available
-                const bgColor = theme.bg_color || '#ffffff'; // Default to white if undefined
-                const textColor = theme.text_color || '#000000'; // Default to black if undefined
-                const cardBgColor = theme.secondary_bg_color || '#f0f0f0'; // Default light color
-                const cardHoverColor = theme.button_color || '#8eaffd'; // Default blue color
-                const shadowColor = theme.shadow_color || 'rgba(0, 0, 0, 0.1)'; // Default shadow
-        
-                // Apply theme colors using CSS variables
-                document.documentElement.style.setProperty('--bg-color', bgColor);
-                document.documentElement.style.setProperty('--text-color', textColor);
-                document.documentElement.style.setProperty('--card-bg-color', cardBgColor);
-                document.documentElement.style.setProperty('--card-hover-bg-color', cardHoverColor);
-                document.documentElement.style.setProperty('--box-shadow', `0 2px 5px ${shadowColor}`);
-                document.documentElement.style.setProperty('--box-shadow-hover', `0 4px 10px ${shadowColor}`);
-            }
-        });
-        
-    </script>
+    
     <!-- Telegram Login Widget -->
     {% comment %} <script async src="https://telegram.org/js/telegram-widget.js?7"
     data-telegram-login="appraisal101_bot" data-size="large" data-radius="10"
