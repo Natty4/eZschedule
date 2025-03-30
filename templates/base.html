@@ -2308,7 +2308,7 @@
                 tg.onEvent('themeChanged', function() {
                     applyTheme(); // Reapply the theme whenever it changes
                 });
-                alert("Telegram Web SDK is loaded successfully.");
+        
                 function applyTheme() {
                     const theme = tg.themeParams || {};
                     // Ensure that the theme values are available
@@ -2317,8 +2317,7 @@
                     const cardBgColor = theme.secondary_bg_color || '#f0f0f0'; // Default light color
                     const cardHoverColor = theme.button_color || '#8eaffd'; // Default blue color
                     const shadowColor = theme.shadow_color || 'rgba(0, 0, 0, 0.1)'; // Default shadow
-                    
-                    alert("Theme applied: " + JSON.stringify(theme));
+                
                     // Apply theme colors using CSS variables
                     document.documentElement.style.setProperty('--bg-color', bgColor);
                     document.documentElement.style.setProperty('--text-color', textColor);
@@ -2328,7 +2327,7 @@
                     document.documentElement.style.setProperty('--box-shadow-hover', `0 4px 10px ${shadowColor}`);
                 }
             } else {
-                alert("Telegram Web SDK is not loaded properly. Please check your integration.");
+                alert("Telegram Web SDK is not loaded properly.");
                 console.error("Telegram Web SDK is not loaded properly.");
             }
         });
