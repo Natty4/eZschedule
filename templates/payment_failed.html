@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Failed - EasySchedule{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="error-page">
+        <h2>Oops! Something went wrong.</h2>
+        <p>We were unable to process your payment. Please try again later or contact our support team if the issue persists.</p>
+        
+        <div class="error-message">
+            <h4>Error Message:</h4>
+            <p>{{ message }}</p>
+        </div>
+
+        <a href="{% url 'business_list' %}" class="btn btn-primary">Return to Businesses</a>
+        <a href="#" class="btn btn-secondary">Contact Support</a>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .error-page {
+        text-align: center;
+        padding: 50px;
+        margin: 30px auto;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 5px;
+    }
+
+    .error-page h2 {
+        font-size: 24px;
+        color: #721c24;
+    }
+
+    .error-message {
+        margin-top: 20px;
+        background-color: #f5c6cb;
+        padding: 10px;
+        border-radius: 5px;
+        color: #721c24;
+    }
+
+    .error-page p {
+        font-size: 18px;
+        color: #721c24;
+    }
+
+    .btn {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+</style>
+{% endblock %}
+{% endblock %}

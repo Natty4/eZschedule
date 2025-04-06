@@ -308,88 +308,111 @@ def booking_form_view(request, business_id, service_id, staff_id, date, time):
 
 
 def booking_summary_view(request, business_id, service_id, staff_id, date, time):
+    # Fetch necessary user data from session
     user_data = request.session.get('user_data')
     if not user_data:
         return redirect('booking_form', business_id=business_id, service_id=service_id, 
                         staff_id=staff_id, date=date, time=time) 
-        
-    start_time, end_time = time.split('-')    
-    start_time = date + '-' + start_time.strip()
-    end_time = date + '-' + end_time.strip()
-    service  = request.session.get('current_service')
-    staff = {}
-    for st in service['employee']:
-        if st['id'] == str(staff_id):
-            staff = st
-            pass
     
-    def process_payment(payment_method):
-        transaction_number = ''.join(random.choice(string.ascii_uppercase+string.digits) for _ in range(12))
-        
-        if payment_method == "card_payment":
-            payment_payload = {
-                "amount": service['price'],
-                "currency": "ETB",
-                "transaction_id": transaction_number,
-                "method": "card"
-                
-            }
-        else:
-            payment_payload = {
-                    "amount": 0,
-                    "currency": "ETB",
-                    "transaction_id": transaction_number,
-                    "method": "cash"
-                    
-                }
-        return payment_payload
-        
-    if request.method == 'POST':
-        payment_method = request.POST.get('payment_method')
-        
-        payment = process_payment(payment_method)
-        # Create the appointment via the API   
-        appointment_data = {
-            "appointment": {
-                "business": user_data['slot']['business'],
-                "service": user_data['slot']['service']['id'],
-                "employee": user_data['slot']['employee']['id'],
-                "slot": user_data['slot']['id'],
-                "notes": user_data['notes'],
-                "preliminary_answer": user_data['preliminary_answer']
-            },
-            "customer": user_data['user_detail'],
-            "payment": payment
-            } 
-        
-        # Send the request as JSON
-        response = requests.post(
-            f'{API_BASE_URL}booking/confirm/',
-            data=json.dumps(appointment_data),
-            headers={'Content-Type': 'application/json'}  # Set the content type to JSON
-        )
-        if response.status_code == 201:
-            response_data = response.json()
-            request.session['booking_successful'] = True    
-            return redirect('thank_you', appointment_id=response_data['appointment']['id'])
-        else:
-            error_message = response.json()
-            return render(request, 'page5.html', {
-                'staff': staff,
-                'service': service,
-                'user_data': user_data['user_detail'],
-                'date': date,
-                'time': time,
-                'error_message': error_message, 'user_data': user_data })
-    return render(request, 'page5.html', {
+    # Generate transaction reference (tx_ref) for Chapa
+    tx_ref = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+    
+    # Set up the callback and return URLs for Chapa
+    callback_url = f"{request.build_absolute_uri('/go/chapa/callback/')}"
+    return_url = f"{request.build_absolute_uri('/thank_you/')}"
+    
+    # Get the service and staff details
+    service = request.session.get('current_service')
+    staff = next((st for st in service['employee'] if st['id'] == str(staff_id)), {})
+    
+    # Pass the data needed for Chapa form
+    return render(request, 'page55.html', {
         'service': service,
         'staff': staff,
         'user_data': user_data,
         'date': date,
-        'time': time
-    })
+        'time': time,
+        'tx_ref': tx_ref,
+        'callback_url': callback_url,
+        'return_url': callback_url,
+        'appointment_id': user_data['slot']['id']
+    })  
+
+
+def chapa_callback_view(request):
+    # Print the full request body and parameters for debugging
+
+    # Initialize tx_ref and status to None
+    tx_ref = None
+    status = None
+
+    # Check if tx_ref is in GET or POST parameters (adjust for possible Chapa parameter name)
+    tx_ref = request.GET.get('trx_ref') or request.POST.get('trx_ref') or request.GET.get('_')
+    status = request.GET.get('status') or request.POST.get('status')
+
+    # Debug output to check the values of tx_ref and status
+    print(f"Chapa Callback - tx_ref: {tx_ref}, status: {status}")
+
+    # If tx_ref or status is still None, return an error message
+    if not tx_ref or not status:
+        return render(request, 'payment_failed.html', {'message': 'Missing required parameters.'})
+
+
+
+    # Once the appointment is created (status pending), check the payment status
+    if status == 'success':
+        # Payment is successful - update the appointment status to 'completed'
+        
+        user_data = request.session.get('user_data')
+        if not user_data:
+            return render(request, 'payment_failed.html', {'message': 'Missing user data.'})
+        # Prepare the initial "pending" appointment data
+        appointment_data = {
+            "appointment": {
+                "business": user_data['slot']['business'],
+                "service": user_data['slot']['service'],
+                "employee": user_data['slot']['employee'],
+                "slot": user_data['slot']['id'],
+                "notes": user_data['notes'],
+                "preliminary_answer": user_data['preliminary_answer']
+            },
+                
+            "customer": user_data['user_detail'],
+            "payment": {
+                "amount": 100,
+                "currency": "ETB",
+                "transaction_id": tx_ref,
+                "method": "online",
+                "status": "pending"
+            }
+        }
+        response = requests.post(
+            f'{API_BASE_URL}booking/confirm/',
+            data=json.dumps(appointment_data),
+            headers={'Content-Type': 'application/json'}
+        )
+        if response.status_code == 201:
+            appointment_data = response.json()
+            appointment_id = appointment_data['appointment']['id']
+            # Store the appointment ID in the session
+            request.session['appointment_id'] = appointment_id
+            request.session['booking_successful'] = True
+            # Redirect to the thank you page
+            return redirect('thank_you', appointment_id=appointment_id)
+        
+        else:
+            # Handle error in booking confirmation
+            data = response.json()
+            error_message = data.get('error', 'Error confirming booking')
+            return render(request, 'payment_failed.html', {'message': error_message})
+
+
+    else:
+        # Payment failed
+        return render(request, 'payment_failed.html', {'message': 'Payment failed!'})
     
     
+     
 # this view can only be accessed after a successful booking
 
 def thank_you_view(request, appointment_id):
@@ -450,4 +473,33 @@ def thank_you_view(request, appointment_id):
 
 
 
-
+def thank_you_view(request, appointment_id):
+    # Get the appointment details
+    response = requests.get(f'{API_BASE_URL}invoice/{appointment_id}/')
+    
+    if response.status_code == 200:
+        invoice_data = response.json()
+        service = request.session.get('current_service')
+        staff_id = invoice_data['appointment']['employee']
+        staff = next((st for st in service['employee'] if st['id'] == str(staff_id)), {})
+        slot = invoice_data['appointment']['slot']
+        appointment = invoice_data['appointment']
+        customer = invoice_data['customer']
+        payment = invoice_data['payment']
+        qr_code_url = invoice_data['qr_code_url']
+        business = request.session.get('business_data', [])
+        
+        return render(request, 'page6.html', {
+            'appointment': appointment,
+            'customer': customer,
+            'service': service,
+            'staff': staff,
+            'date': slot['date'],
+            'slot': slot,
+            'payment': payment,
+            'qr': qr_code_url,
+            'business_data': business,
+            'success_message': "Success!"
+        })
+    else:
+        return render(request, 'page6.html', {'error_message': 'Error fetching invoice data.'})

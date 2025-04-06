@@ -182,22 +182,29 @@
                 </div>
                 <div class="card personal">
                     <h4>Personal Info</h4>
-                    <p>👤 {{ customer.full_name }}</p>
-                    <p>📱 {{ customer.phone_number }}</p>
-                    <p>📍 {{ customer.address }}</p>
-                    <p>📝 {{ appointment.notes }}</p>
-                    <h5>{{ service.title }}</h5>
-                    <hr>
+                    <p>👤 {{ customer.full_name|default:"N/A" }}</p>
+                    <p>📱 {{ customer.phone_number|default:"N/A" }}</p>
+                    <p>📍 {{ customer.address|default:"N/A" }}</p>
+                    <p>📝 {{ appointment.notes|default:"None" }}</p>
 
-                    <p>💵 Service Price: {{ service.price }} ETB</p>
-                    <p>💸 Payed Amount: {{ payment.amount }} {{ payment.currency }} </p>
-                    <p>💳 Method: {{ payment.method }} </p>
-                    <p>✔️ Payment status: {{ payment.status }} </p>
+                    {% if service %}
+                        <h5>{{ service.title }}</h5>
+                        <hr>
+                        <p>💵 Service Price: {{ service.price }} ETB</p>
+                    {% endif %}
+
+                    {% if payment %}
+                        <p>💸 Paid Amount: {{ payment.amount }} {{ payment.currency }}</p>
+                        <p>💳 Method: {{ payment.method }}</p>
+                        <p>✔️ Payment status: {{ payment.status }}</p>
+                    {% else %}
+                        <p>❌ Payment information not available.</p>
+                    {% endif %}
                     
                 </div>
                 <div class="card qr">
                     <h4>Appointment QR Code</h4>
-                    <image src="{{ qr }}" class="qrc"/>
+                    <img src="{{ qr }}" class="qrc" alt="Your appointment QR code" />
                     <p>Present this QR code at the entrance.</p>
                     
                     <div class="">
@@ -207,9 +214,9 @@
                         </button> {% endcomment %}
                         {% comment %} onclic print page  {% endcomment %}
 
-                        <button class="btn btn-primary" onclick="window.print()">
-                            <i class="fas fa-download"></i>
-                            Get Invoice
+                        <button class="btn btn-primary" onclick="window.print()" aria-label="Print Receipt">
+                            <i class="fas fa-print"></i>
+                            Print Receipt
                         </button>
                         <p>View and save the full receipt for your reference.</p>
                     </div>
@@ -282,24 +289,27 @@
         document.getElementById("personal-detail").classList.add("active");
         document.getElementById("confirm-step").classList.add("active");
         
+        function formatDateTime(date, time) {
+            const [year, month, day] = date.split("-");
+            const [hour, minute] = time.split(":");
+            return `${year}${month}${day}T${hour}${minute}00`;
+        }
+    
         function addToCalendar() {
-            // Get the relevant information from your context (template variables)
-            const appointmentTitle = "Appointment with " + "{{ staff.full_name }}"; // Staff name
-            const serviceTitle = "{{ service.title }}"; // Service name
-            const customerName = "{{ customer.full_name }}"; // Customer name
-            const appointmentDate = "{{ date }}"; // Appointment date
-            const appointmentStartTime = "{{ slot.start_time }}"; // Appointment start time
-            const appointmentEndTime = "{{ slot.end_time }}"; // Appointment end time
-            const appointmentTime = "{{ slot }}"; // Appointment time
+            const appointmentTitle = "Appointment with {{ staff.full_name|escapejs }}";
+            const serviceTitle = "{{ service.title|escapejs }}";
+            const customerName = "{{ customer.full_name|escapejs }}";
+            const appointmentDate = "{{ date }}";
+            const appointmentStartTime = "{{ slot.start_time }}";
+            const appointmentEndTime = "{{ slot.end_time }}";
             const description = `Service: ${serviceTitle}\nCustomer: ${customerName}`;
-        
-            // Format the start and end time (ISO 8601 format)
-            const startDateTime = `${appointmentDate}T${appointmentTime}`;
-            const endDateTime = `${appointmentDate}T${parseInt(appointmentStartTime.split(':')[0]) + 1}:${appointmentEndTime.split(':')[1]}`;
-        
-            // Google Calendar URL with the details
-            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(appointmentTitle)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}`;
+            
+            const start = formatDateTime(appointmentDate, appointmentStartTime);
+            const end = formatDateTime(appointmentDate, appointmentEndTime);
+            
+            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(appointmentTitle)}&dates=${start}/${end}&details=${encodeURIComponent(description)}`;
             window.open(calendarUrl, '_blank');
+        }
         }
     </script>
 {% endblock %}

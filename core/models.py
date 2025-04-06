@@ -189,7 +189,7 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=3, default='ETB', choices=[('ETB', 'ETB'), ('USD', 'USD')])  # Added currency field
     transaction_id = models.CharField(max_length=12, unique=True)
-    method = models.CharField(max_length=20, choices=[('card', 'Card'), ('cash', 'Cash'), ('mobile', 'Mobile')], default='card')
+    method = models.CharField(max_length=20, choices=[('card', 'Card'), ('cash', 'Cash'), ('online', 'Online')], default='online')
     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')], default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     
