@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     // API base URL
-    window.apiBaseUrl = "http://127.0.0.1:8000/go/api/"
+    window.apiBaseUrl = "https://ezgo-ekrp.onrender.com/go/api/"
   })
   
   
