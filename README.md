@@ -27,7 +27,7 @@ EasySchedule is a robust, user-friendly web application designed to simplify app
 6. [Contact Information](#contact-information)
 7. [Acknowledgments](#acknowledgments)
 8. [Call to Action](#call-to-action)
-9. [Demo](#demo)
+9. [Demo](#call-to-action)
 ---
 
 ## Features
