@@ -19,21 +19,10 @@ EasySchedule is a robust, user-friendly web application designed to simplify app
 
 ## Table of Contents
 
-1. [Features](#-features)
+- [Features](#-features)
 2. [Installation Instructions](#-installation-instructions)
-   - [Prerequisites](#prerequisites)
-   - [Setup](#setup)
 3. [Usage](#-usage)
-   - [Sample Commands](#sample-commands)
-   - [API Endpoints](#api-endpoints)
-   - [Frontend Workflows](#frontend-workflows)
 4. [Contributing Guidelines](#-contributing-guidelines)
-   - [Fork the Repository](#fork-the-repository)
-   - [Create a Feature Branch](#create-a-feature-branch)
-   - [Make Changes](#make-changes)
-   - [Submit a Pull Request](#submit-a-pull-request)
-   - [Report Issues](#report-issues)
-   - [Coding Standards](#coding-standards)
 5. [License Information](#-license-information)
 6. [Contact Information](#-contact-information)
 7. [Acknowledgments](#-acknowledgments)
