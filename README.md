@@ -2,13 +2,14 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/natty4/eZschedule/main/static/images/logo.png" alt="Logo" width="200" height="200">
   <h1>EasySchedule</h1>
+</div>
     <p>A simple and easy-to-use appointment booking and payment solution.</p>
     <p>Built with Python and Django, EasySchedule is an open-source project that simplifies appointment management for businesses and their customers.</p>
     <p>Join us in building a scalable and extensible solution for appointment management.</p>
     <p>Contributors of all skill levels are welcome!</p>
     <p>Check out the <a href="https://ezgo-ekrp.onrender.com/">Demo</a>
 
-</div>
+
 
 # EasySchedule: Open-Source Appointment Booking and Payment Solution
 
@@ -18,14 +19,26 @@ EasySchedule is a robust, user-friendly web application designed to simplify app
 
 ## Table of Contents
 
-1. Features
-2. Installation Instructions
-3. Usage
-4. Contributing Guidelines
-5. License Information
-6. Contact Information
-7. Acknowledgments
-8. Call to Action
+1. [Features](#-features)
+2. [Installation Instructions](#-installation-instructions)
+   - [Prerequisites](#prerequisites)
+   - [Setup](#setup)
+3. [Usage](#-usage)
+   - [Sample Commands](#sample-commands)
+   - [API Endpoints](#api-endpoints)
+   - [Frontend Workflows](#frontend-workflows)
+4. [Contributing Guidelines](#-contributing-guidelines)
+   - [Fork the Repository](#fork-the-repository)
+   - [Create a Feature Branch](#create-a-feature-branch)
+   - [Make Changes](#make-changes)
+   - [Submit a Pull Request](#submit-a-pull-request)
+   - [Report Issues](#report-issues)
+   - [Coding Standards](#coding-standards)
+5. [License Information](#-license-information)
+6. [Contact Information](#-contact-information)
+7. [Acknowledgments](#-acknowledgments)
+8. [Call to Action](#-call-to-action)
+9. [Demo](#demo)
 
 ---
 
@@ -193,6 +206,7 @@ We believe in the power of open-source and the strength of community. Whether yo
 
 **Start contributing today!** 😊
 
+---
 Built with 💙   •
   <a href="https://github.com/natty4/eZschedule">GitHub</a> •
   <a href="https://ezgo-ekrp.onrender.com/">Demo</a> •
