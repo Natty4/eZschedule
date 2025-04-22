@@ -296,32 +296,39 @@
             const [hour, minute] = time.split(":");
             return `${year}${month}${day}T${hour}${minute}00`;
         }
-    
+        
         function addToCalendar() {
             const appointmentTitle = "Appointment with {{ staff.full_name|escapejs }}";
             const serviceTitle = "{{ service.title|escapejs }}";
             const customerName = "{{ customer.full_name|escapejs }}";
-            const appointmentDate = "{{ date }}";  // Example: '2025-04-10'
-            const appointmentStartTime = "{{ slot.start_time }}";  // Example: '15:20'
-            const appointmentEndTime = "{{ slot.end_time }}";      // Example: '17:00'
+            const appointmentDate = "{{ date }}";  // Example: '2025-04-24'
+            const appointmentStartTime = "{{ slot.start_time }}";  // Example: '08:40'
+            const appointmentEndTime = "{{ slot.end_time }}";      // Example: '10:20'
             const description = `Service: ${serviceTitle}\nCustomer: ${customerName}`;
-            
-            // Helper function to format time into Google Calendar format (with date as a fixed part)
+        
+            // Helper function to format date and time into Google Calendar format (with date as a fixed part)
             function formatTime(date, time) {
-                // '2025-04-10' + '15:20' => '20250410T152000'
-                const formattedDateTime = `${date.replace(/-/g, '')}T${time.replace(/:/g, '')}:00`;
+                // Split the time and date if the time includes the date part
+                const timeParts = time.split(' ');  // Time can have date (e.g., '2025-04-24 08:40')
+                const [hour, minute] = timeParts[timeParts.length - 1].split(":");
+                const formattedDateTime = `${date.replace(/-/g, '')}T${hour}${minute}00`;
                 return formattedDateTime;
             }
-        
-            const start = formatTime(appointmentDate, appointmentStartTime);
-            const end = formatTime(appointmentDate, appointmentEndTime);
+                    
+            // Convert the start and end time into the correct format
+            const start = formatTime(appointmentDate, appointmentStartTime); // Start time
+            const end = formatTime(appointmentDate, appointmentEndTime); // End time
             
-            // Format the calendar URL for Google Calendar
-            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(appointmentTitle)}&dates=${start}/${end}&details=${encodeURIComponent(description)}`;
-        
+            // Format the Google Calendar URL with the formatted start and end times
+            const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(appointmentTitle)}&dates=${start}/${end}&details=${encodeURIComponent(description)}&pli=1`;
+            
             // Open the Google Calendar URL in a new tab
             window.open(calendarUrl, '_blank');
         }
+        
+        
+        
+              
         
         
     </script>
