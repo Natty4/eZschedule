@@ -315,50 +315,76 @@ class BookingConfirmationAPIView(APIView):
             # Create appointment
             appointment_data["customer"] = customer_data['id']
             appointment_serializer = AppointmentSerializer(data=appointment_data)
-            try:
-                if appointment_serializer.is_valid():
-                    appointment = appointment_serializer.save()
-                else:
-                    return Response(appointment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:             
-                return Response({f"error: fiald to create appointment"}, status=status.HTTP_400_BAD_REQUEST)
-
+            if appointment_serializer.is_valid():
+                appointment = appointment_serializer.save()
+            else:
+                return Response(appointment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
             # Create payment
             payment_data["appointment"] = appointment.id
             payment_serializer = PaymentSerializer(data=payment_data)
-            try:
-                if payment_serializer.is_valid():
-                    if payment_serializer.validated_data['method'] == "card":
-                        payment_serializer.validated_data['status'] = "completed"  
-                    payment = payment_serializer.save()
-                    
-                    # Update appointment status based on payment status
-                    if payment.status == "completed":
-                        appointment.status = "confirmed"
-                    else:
-                        appointment.status = "pending"
-                    appointment.save()
-                    # appointment_link = str(appointment.id) + '?' + str(customer.id) + '-' + str(payment.id)
-                    appointment_link = request.build_absolute_uri(appointment.id)
-
-                    appointment_link = str(appointment.id)
-                    return Response({
-                        "appointment": appointment_serializer.data,
-                        "payment": payment_serializer.data,
-                        "invoice_link": appointment_link
-                    }, status=status.HTTP_201_CREATED)
-                    
+            if payment_serializer.is_valid():
+                if payment_serializer.validated_data['method'] == "card":
+                    payment_serializer.validated_data['status'] = "completed"  
+                payment = payment_serializer.save()
+                
+                # Update appointment status based on payment status
+                if payment.status == "completed":
+                    appointment.status = "confirmed"
                 else:
-                    return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                # customer.delete()
-                # appointment.delete()
-                return Response({str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                    appointment.status = "pending"
+                appointment.save()
+
+                appointment_link = request.build_absolute_uri(appointment.id)
+                return Response({
+                    "appointment": appointment_serializer.data,
+                    "payment": payment_serializer.data,
+                    "invoice_link": appointment_link
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception as e:
-            return Response({str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request):
+        """
+        Update payment status after receiving the Chapa callback.
+        """
+        tx_ref = request.data.get("tx_ref")
+        status = request.data.get("status")
+        
+        if not tx_ref or not status:
+            return Response({"error": "Missing tx_ref or status"})
+        
+        try:
+            # Fetch the appointment and payment data using tx_ref
+            appointment = Appointment.objects.get(payment__transaction_id=tx_ref)
+            payment = Payment.objects.get(transaction_id=tx_ref)
+            
+            # Update payment status
+            payment.status = 'completed' if status == 'success' else 'failed'
+            payment.save()
+
+            # Update appointment status based on payment status
+            if payment.status == "completed":
+                appointment.status = "confirmed"
+            else:
+                appointment.status = "pending"
+            appointment.save()
+
+            # Return updated payment and appointment info
+            return Response({
+                "appointment": AppointmentSerializer(appointment).data,
+                "payment": PaymentSerializer(payment).data
+            }, status=200)
+        
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found for the provided tx_ref"})
+        
+        except Payment.DoesNotExist:
+            return Response({"error": "Payment not found for the provided tx_ref"})
+        
 
 class InvoiceAPIView(APIView):
     def get(self, request, appointment_id):

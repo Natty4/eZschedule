@@ -152,7 +152,7 @@
                     <p><strong>{{ date }} </strong> at <strong id="app-time"> </strong></p>
                     <p><strong>Service Price: {{ service.price }} ETB</strong></p>
                     <br>
-                    <p><strong>Booking Fee: {{ booking_fee }} ETB</strong></p>
+                    <p><strong>Booking Fee: {{ booking_fee }} 100 ETB</strong></p>
                     <p><strong>Tax (0%): {% widthratio 100 0 1 %} ETB</strong></p>
                     <hr>
                     <p><strong>Total Fee: {% widthratio 100 1 1 %} ETB</strong></p>
@@ -161,9 +161,8 @@
                 <!-- Card 3: Payment Options -->
                 <div class="card">
                     <h4>Payment</h4>
-
                     <!-- Chapa Payment Button -->
-                    <form method="POST" action="https://api.chapa.co/v1/hosted/pay">
+                    <form method="POST" action="https://api.chapa.co/v1/hosted/pay" >
                         {% csrf_token %}
                         <input type="hidden" name="public_key" value="CHAPUBK_TEST-QRwIuFlwP4OLqpX6eshVETf0H4pGHH3b" />
                         <!-- Generate dynamic tx_ref -->
@@ -174,7 +173,7 @@
                         <input type="hidden" name="first_name" value="{{ user_data.user_detail.full_name }}" />
                         <input type="hidden" name="last_name" value="{{ user_data.user_detail.full_name }}" />
                         <input type="hidden" name="title" value="Booking Payment" />
-                        <input type="hidden" name="description" value="Paying for a service booking" />
+                        <input type="hidden" name="description" value="Paying for a online service booking" />
                         <input type="hidden" name="logo" value="https://chapa.link/asset/images/chapa_swirl.svg" />
                         <!-- Dynamic Callback URL for your success page -->
                         <input type="hidden" name="callback_url" value="{{ callback_url }}" /> 
