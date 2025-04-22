@@ -19,16 +19,15 @@ EasySchedule is a robust, user-friendly web application designed to simplify app
 
 ## Table of Contents
 
-- [Features](#-features)
-2. [Installation Instructions](#-installation-instructions)
-3. [Usage](#-usage)
-4. [Contributing Guidelines](#-contributing-guidelines)
-5. [License Information](#-license-information)
-6. [Contact Information](#-contact-information)
-7. [Acknowledgments](#-acknowledgments)
-8. [Call to Action](#-call-to-action)
+1. [Features](#features)
+2. [Installation Instructions](#installation-instructions)
+3. [Usage](#usage)
+4. [Contributing Guidelines](#contributing-guidelines)
+5. [License Information](#license-information)
+6. [Contact Information](#contact-information)
+7. [Acknowledgments](#acknowledgments)
+8. [Call to Action](#call-to-action)
 9. [Demo](#demo)
-
 ---
 
 ## Features
